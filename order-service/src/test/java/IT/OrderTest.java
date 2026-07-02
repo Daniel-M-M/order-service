@@ -5,23 +5,23 @@ import com.moreira.order_service.mapper.OrderMapper;
 import com.moreira.order_service.model.Order;
 import com.moreira.order_service.service.OrderService;
 import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
-import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
-import java.util.Collections;
+import java.time.LocalDate;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static tools.jackson.databind.type.LogicalType.Map;
+import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @SpringBootTest(classes = {OrderServiceApplication.class},
@@ -39,124 +39,148 @@ public class OrderTest {
     @LocalServerPort
     private int port;
 
-    @Test
-    public void OrderTestPost(){
+    @BeforeEach
+    void setUp() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
-        Response response = RestAssured
-        .given()
-        .contentType(ContentType.JSON)
-        .body("""
-                {
-                  "name": "Francesco",
-                  "cognome": "Nero",
-                  "email": "nero.f@gmail.com",
-                  "dataOrder": "2026-06-26",
-                  "price": "78.92"
-                }""") // Send request payload
-        .post("/orders");
+    }
 
-        String jsonOrder = response.getBody().asString();
+    @Test
+    public void OrderTestPost(){
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        Order order = objectMapper.readValue(jsonOrder, Order.class);
+        Order requestPayload = new Order(
+            "Francesco",
+            "Nero",
+            "nero.f@gmail.com",
+            LocalDate.parse("2026-06-26"),
+            Double.parseDouble("78.92")
+        );
 
-        assertEquals(200, response.getStatusCode());
-        assertEquals("Francesco", order.getName());
-        assertEquals("Nero", order.getCognome());
-        assert order.getDataOrder() != null;
-        assertEquals("2026-06-26", order.getDataOrder().toString());
-        assertEquals("nero.f@gmail.com", order.getEmail());
-        assertEquals("78.92", order.getPrice().toString());
+        Order responseOrder = given()
+            .contentType(ContentType.JSON)
+            .body(requestPayload)
+            .post("/orders")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(Order.class);
+
+        assertNotNull(responseOrder.getDataOrder(), "La data dell'ordine non deve essere null");
+        assertEquals("Francesco", responseOrder.getName());
+        assertEquals("Nero", responseOrder.getCognome());
+        assertEquals("2026-06-26", responseOrder.getDataOrder().toString());
+        assertEquals("nero.f@gmail.com", responseOrder.getEmail());
+        assertEquals(Double.parseDouble("78.92"), responseOrder.getPrice());
 
     }
 
     @Test
     public void OrderTestGet(){
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = port;
-        Response responsePost = RestAssured
-                .given()
+
+        Order requestPayload = new Order(
+                "Mario",
+                "Rossi",
+                "rossi.m@gmail.com",
+                LocalDate.parse("2026-06-26"),
+                Double.parseDouble("89.53")
+        );
+
+        Order order = given()
                 .contentType(ContentType.JSON)
-                .filter(new io.restassured.filter.log.RequestLoggingFilter())
-                .filter(new io.restassured.filter.log.ResponseLoggingFilter())
-                .body("""
-                        {
-                          "name": "Marco",
-                          "cognome": "Bianchi",
-                          "email": "bianchi.m@gmail.com",
-                          "dataOrder": "2026-06-27",
-                          "price": "90.92"
-                        }""") // Send request payload
-                .post("/orders");
-        String jsonOrder = responsePost.getBody().asString();
-        ObjectMapper objectMapper = new ObjectMapper();
-        Order order = objectMapper.readValue(jsonOrder, Order.class);
-        //Chiamare HTTP
-        Response responseGet = RestAssured
-                .given()
+                .body(requestPayload)
+                .post("/orders")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(Order.class);
+
+        assertThat(order.getDataOrder()).isNotNull();
+
+        List<Order> ordersResponse = given()
                 .queryParam("page", 0)
-                .queryParam("size", 5)
-                .filter(new io.restassured.filter.log.RequestLoggingFilter())
-                .filter(new io.restassured.filter.log.ResponseLoggingFilter())
-                .get("/orders");
+                .queryParam("size", 10)
+                .when()
+                .get("/orders")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(new TypeRef<List<Order>>() {});
 
-        assertEquals(200, responseGet.getStatusCode());
+        assertThat(order.getDataOrder()).isNotNull();
+        assertThat(ordersResponse.getFirst().getDataOrder()).isNotNull();
 
-        String jsonOrder1 = responseGet.getBody().asString();
+        //Assert for each element contains on response list
+        assertThat(ordersResponse)
+                .extracting(Order::getName, Order::getCognome, Order::getEmail, Order::getPrice, Order::getDataOrder)
+                .contains(tuple(
+                        order.getName(),
+                        order.getCognome(),
+                        order.getEmail(),
+                        order.getPrice(),
+                        order.getDataOrder()
+                ));
 
-        ObjectMapper objectMapper1 = new ObjectMapper();
-        List<Order> ordersResponse = objectMapper1.readValue(jsonOrder1, new TypeReference<>() {});
-
-        //List<Order> ordersResponse = objectMapper.readValue(jsonOrder1, new TypeReference<List<Order>>() {});
-
-        //Fare per tutti i campi
-        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getName().equals(order.getName())));
-        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getCognome().equals(order.getCognome())));
-        assert order.getDataOrder() != null;
-        assert ordersResponse.getFirst().getDataOrder() != null;
-        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getDataOrder().equals(order.getDataOrder())));
-        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getEmail().equals(order.getEmail())));
-        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getPrice().equals(order.getPrice())));
+        //Assert for each element lambda func
+        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getName().equals(order.getName())
+                && order1.getCognome().equals(order.getCognome())
+                && order1.getDataOrder().equals(order.getDataOrder())
+                && order1.getEmail().equals(order.getEmail())
+                && order1.getPrice().equals(order.getPrice())));
 
     }
 
-//    @Test
-//    public void OrderTestGetWithUUID(){
-//        RestAssured.baseURI = "http://localhost";
-//        RestAssured.port = port;
-//        Response response = RestAssured
-//                .given()
-//                .contentType(ContentType.JSON)
-//                //+.pathParam("idRubrica", UUID.fromString("12fea6b9-34ba-4e63-a1d5-4d20f528c2d8"))
-//                //.headers(generateHeaders())
-//                .body("""
-//                        {
-//                          "name": "Mario",
-//                          "cognome": "Rossi",
-//                          "email": "rossi.m@gmail.com",
-//                          "dataOrder": "2026-06-28",
-//                          "price": "50.32"
-//                        }""") // Send request payload
-//                .post("/orders");
-//
-//        String jsonOrder = response.getBody().asString();
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        Order order = objectMapper.readValue(jsonOrder, Order.class);
-//
-//        List<Order> getOrder = orderMapper.orderServiceModelToOrder(orderService.getOrders(0L, 5L));
-//
-//        Order getOrderWithUuid = orderMapper.orderServiceModelToOrder(orderService.getOrder(getOrder.getFirst().getUuid()));
-//
-//        assertEquals(order.getName(), getOrderWithUuid.getName());
-//        assertEquals(order.getCognome(), getOrderWithUuid.getCognome());
-//        assert order.getDataOrder() != null;
-//        assert getOrderWithUuid.getDataOrder() != null;
-//        assertEquals(order.getDataOrder().toString(), getOrderWithUuid.getDataOrder().toString());
-//        assertEquals(order.getEmail(), getOrderWithUuid.getEmail());
-//        assertEquals(order.getPrice().toString(), getOrderWithUuid.getPrice().toString());
-//
-//    }
+    @Test
+    public void OrderTestGetWithUUID(){
+
+        Order requestPayload = new Order(
+                "Marco",
+                "Bianchi",
+                "bianchi.m@gmail.com",
+                LocalDate.parse("2026-06-26"),
+                Double.parseDouble("25.53")
+        );
+
+        Order order = given()
+                .contentType(ContentType.JSON)
+                .body(requestPayload)
+                .post("/orders")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(Order.class);
+
+        assertThat(order.getDataOrder()).isNotNull();
+
+        Order orderResponse = RestAssured
+                .given()
+                .contentType(ContentType.JSON)
+                .pathParam("uuidOrder", order.getUuid())
+                .get("/orders/{uuidOrder}")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(Order.class);
+
+        assertThat(order.getDataOrder()).isNotNull();
+        assertThat(orderResponse.getDataOrder()).isNotNull();
+
+        //Assert for each parameter
+        assertThat(orderResponse)
+                .extracting(Order::getName, Order::getCognome, Order::getEmail, Order::getPrice, Order::getDataOrder)
+                .containsExactly(
+                        order.getName(),
+                        order.getCognome(),
+                        order.getEmail(),
+                        order.getPrice(),
+                        order.getDataOrder()
+                );
+
+        //Assert for object and ignoring fields
+        assertThat(orderResponse)
+                .usingRecursiveComparison()
+                .ignoringFields("uuid")
+                .isEqualTo(order);
+
+    }
 
 }
