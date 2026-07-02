@@ -293,7 +293,7 @@
 <!--								<volumes>-->
 <!--									<bind>-->
 <!--										<volume>-->
-<!--											${project.basedir}/docker/postgres/volumes/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d-->
+<!--											${project.basedir}/dockerfile/postgres/volumes/dockerfile-entrypoint-initdb.d:/dockerfile-entrypoint-initdb.d-->
 <!--										</volume>-->
 <!--									</bind>-->
 <!--								</volumes>-->
