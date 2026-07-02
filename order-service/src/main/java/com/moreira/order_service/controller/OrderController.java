@@ -21,16 +21,20 @@ public class OrderController implements OrderApi {
 
     @Override
     public ResponseEntity<Order> createOrder(Order order) {
+        System.out.println("starting the createOrder");
         return ResponseEntity.ok(orderMapper.orderServiceModelToOrder(orderService.createOrder(orderMapper.orderToOrderServiceModel(order))));
     }
 
     @Override
     public ResponseEntity<Order> getOrder(UUID uuidOrder) {
+
+        System.out.println("starting the getOrder");
         return ResponseEntity.ok(orderMapper.orderServiceModelToOrder(orderService.getOrder(uuidOrder)));
     }
 
     @Override
     public ResponseEntity<List<Order>> getOrders(Long page, Long size) {
+        System.out.println("starting the getOrders");
         return ResponseEntity.ok(orderMapper.orderServiceModelToOrder(orderService.getOrders(page, size)));
     }
 

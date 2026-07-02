@@ -78,6 +78,8 @@ public class OrderTest {
         Response responsePost = RestAssured
                 .given()
                 .contentType(ContentType.JSON)
+                .filter(new io.restassured.filter.log.RequestLoggingFilter())
+                .filter(new io.restassured.filter.log.ResponseLoggingFilter())
                 .body("""
                         {
                           "name": "Marco",
@@ -90,13 +92,11 @@ public class OrderTest {
         String jsonOrder = responsePost.getBody().asString();
         ObjectMapper objectMapper = new ObjectMapper();
         Order order = objectMapper.readValue(jsonOrder, Order.class);
-
         //Chiamare HTTP
         Response responseGet = RestAssured
                 .given()
-                .contentType(ContentType.JSON)
-                .queryParam("page", 0L)
-                .queryParam("size", 5L)
+                .queryParam("page", 0)
+                .queryParam("size", 5)
                 .filter(new io.restassured.filter.log.RequestLoggingFilter())
                 .filter(new io.restassured.filter.log.ResponseLoggingFilter())
                 .get("/orders");

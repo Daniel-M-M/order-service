@@ -36,6 +36,28 @@
 		<openapitools.version>7.16.0</openapitools.version>
 		<jackson-databind-nullable.version>0.2.6</jackson-databind-nullable.version>
 	</properties>
+	<dependencyManagement>
+		<dependencies>
+			<!-- Spring Boot's BOM pins Groovy 5, but rest-assured's HTTPBuilder is only
+			     compatible with Groovy 4.x (https://github.com/rest-assured/rest-assured/issues/1846).
+			     Force Groovy back to the version rest-assured 5.5.0 was built against. -->
+			<dependency>
+				<groupId>org.apache.groovy</groupId>
+				<artifactId>groovy</artifactId>
+				<version>4.0.22</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.groovy</groupId>
+				<artifactId>groovy-xml</artifactId>
+				<version>4.0.22</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.groovy</groupId>
+				<artifactId>groovy-json</artifactId>
+				<version>4.0.22</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -115,7 +137,7 @@
 		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
-			<version>5.4.0</version>
+			<version>5.5.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
