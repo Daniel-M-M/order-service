@@ -22,3 +22,15 @@ services:
       options:
         max-size: "200k"
         max-file: "5"
+  order-be:
+    image: order_service:1.0.0
+    container_name: order-service-be
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      DB_URL: jdbc:postgresql://order-postgres:5432/postgres
+      DB_USER: postgres
+      DB_PASSWORD: example
+    depends_on:
+      - postgres
