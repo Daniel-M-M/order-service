@@ -1,0 +1,14 @@
+-- INSERT INTO orders (name, email, cognome, data_order)
+-- VALUES ('Mario', 'Bianchi', 'bianchi.m@gmail.com', '2026-06-26');
+--
+-- INSERT INTO postgres.orders (name, email, cognome, data_order)
+-- VALUES ('Marco', 'Gialli', 'gialli.m@gmail.com', '2026-06-26');
+--
+-- INSERT INTO postgres.orders (name, email, cognome, data_order)
+-- VALUES ('Paolo', 'Azzurri', 'azzurri.p@gmail.com', '2026-06-26');
+--
+-- INSERT INTO postgres.orders (name, email, cognome, data_order)
+-- VALUES ('Georgia', 'Neri', 'neri.g@gmail.com', '2026-06-26');
+--
+-- INSERT INTO postgres.orders (name, email, cognome, data_order)
+-- VALUES ('Carlo', 'Rossi', 'rossi.c@gmail.com', '2026-06-26');

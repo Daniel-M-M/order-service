@@ -1,0 +1,117 @@
+components:
+  requestBodies:
+    OrderRequestOnCreate:
+      description: Order request body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Order'
+
+  responses:
+    MessageResponse:
+      description: Messaggio generico
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Message'
+
+    OrderResponse:
+      description: Order Response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Order'
+
+    OrderResponseList:
+      description: Order Response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/Order'
+
+  schemas:
+    Order:
+      type: object
+      properties:
+        uuid:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        cognome:
+          type: string
+        email:
+          type: string
+        data:
+          $ref: '#/components/schemas/Date'
+        dataOrder:
+          $ref: '#/components/schemas/Date'
+        price:
+          $ref: '#/components/schemas/price'
+      required:
+        - name
+        - email
+        - cognome
+        - dataOrder
+        - price
+
+    OrderCreate:
+      type: object
+      properties:
+        name:
+          type: string
+
+    Message:
+      required:
+        - code
+        - description
+      type: object
+      properties:
+        code:
+          type: string
+          description: Codice risposta
+          example: OK
+        description:
+          type: string
+          description: Descrizione
+          example: Operazione eseguita correttamente
+        detail:
+          type: string
+          description: Descrizione dettagliata
+          example: Operazione eseguita correttamente senza avvertimenti
+        error-list:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+
+    Error:
+      required:
+        - description
+      type: object
+      properties:
+        field-name:
+          type: string
+        description:
+          type: string
+          description: Descrizione
+
+    Date:
+      type: string
+      format: date
+      example: '2026-04-22'
+
+    price:
+      type: number
+      format: double
+      example: 19.99
+      description: "Price in euros"
+
+    Id:
+      type: integer
+      format: int64
+
+    UUID:
+      type: string
+      format: uuid
+      example: "550e8400-e29b-41d4-a716-446655440000"

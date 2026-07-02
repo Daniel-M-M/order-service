@@ -1,0 +1,2 @@
+ALTER TABLE orders
+    ADD data_order DATE DEFAULT CURRENT_DATE;

@@ -1,0 +1,74 @@
+openapi: 3.0.1
+info:
+  title: Order Service
+  description: Order Service
+  version: 1.0.0
+servers:
+  - url: 'https://localhost:8083'
+
+tags:
+  - name: Order
+
+paths:
+
+  /orders:
+    get:
+      tags:
+        - Order
+      summary: Return list of order
+      operationId: getOrders
+      parameters:
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: size
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          $ref: './commons.yaml#/components/responses/OrderResponseList'
+        "400":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+        "500":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+
+    post:
+      tags:
+        - Order
+      summary: Create an order
+      operationId: createOrder
+      requestBody:
+        $ref: './commons.yaml#/components/requestBodies/OrderRequestOnCreate'
+      responses:
+        "200":
+          $ref: './commons.yaml#/components/responses/OrderResponse'
+        "400":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+        "500":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+
+  /orders/{uuidOrder}:
+    get:
+      tags:
+        - Order
+      summary: Return one order
+      operationId: getOrder
+      parameters:
+        - name: uuidOrder
+          in: path
+          required: true
+          schema:
+            $ref: './commons.yaml#/components/schemas/UUID'
+      responses:
+        "200":
+          $ref: './commons.yaml#/components/responses/OrderResponse'
+        "400":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+        "500":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
