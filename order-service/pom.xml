@@ -272,6 +272,13 @@
 							<goal>stop</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>build-application-image</id>
+						<phase>install</phase>
+						<goals>
+							<goal>build</goal>
+						</goals>
+					</execution>
 				</executions>
 				<configuration>
 					<autoCreateCustomNetworks>true</autoCreateCustomNetworks>
@@ -293,7 +300,7 @@
 <!--								<volumes>-->
 <!--									<bind>-->
 <!--										<volume>-->
-<!--											${project.basedir}/dockerfile/postgres/volumes/dockerfile-entrypoint-initdb.d:/dockerfile-entrypoint-initdb.d-->
+<!--											${project.basedir}/Dockerfile/postgres/volumes/Dockerfile-entrypoint-initdb.d:/Dockerfile-entrypoint-initdb.d-->
 <!--										</volume>-->
 <!--									</bind>-->
 <!--								</volumes>-->
@@ -315,6 +322,13 @@
 									<log>database system is ready to accept connections</log>
 								</wait>
 							</run>
+						</image>
+						<image>
+							<name>order_service:1.0.0</name>
+							<build>
+								<dockerFileDir>${project.basedir}/src/main/resources/docker</dockerFileDir>
+								<filter>@</filter>
+							</build>
 						</image>
 					</images>
 				</configuration>
