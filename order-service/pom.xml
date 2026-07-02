@@ -326,7 +326,8 @@
 						<image>
 							<name>order_service:1.0.0</name>
 							<build>
-								<dockerFileDir>${project.basedir}/src/main/resources/docker</dockerFileDir>
+								<dockerFile>${project.basedir}/src/main/resources/docker/Dockerfile</dockerFile>
+								<contextDir>${project.basedir}</contextDir>
 								<filter>@</filter>
 							</build>
 						</image>
