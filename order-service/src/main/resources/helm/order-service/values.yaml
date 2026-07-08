@@ -159,3 +159,15 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+config:
+  databases:
+    db:
+      secrets:
+        name: order-service-secrets
+        url: url_key_db_postgres
+        user: user_key_db_postgres
+        password: pass_key_db_postgres
+      queryTimeout: 5
+      poolMaxConnections: 15
+      poolMinConnections: 15

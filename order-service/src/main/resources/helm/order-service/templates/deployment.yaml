@@ -45,12 +45,23 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           env:
-            - name: DB_URL
-              value: jdbc:postgresql://192.168.1.132:5434/postgres
-            - name: DB_USER
-              value: postgres
-            - name: DB_PASSWORD
-              value: example
+            {{- range $k, $v := $.Values.config.databases}}
+            - name: {{ $k | upper }}_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "A secretName is required!" $v.secrets.name }}
+                  key: {{ required "A url is required!" $v.secrets.url }}
+            - name: {{ $k | upper }}_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "A secretName is required!" $v.secrets.name }}
+                  key: {{ required "A user is required!" $v.secrets.user }}
+            - name: {{ $k | upper }}_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "A secretName is required!" $v.secrets.name }}
+                  key: {{ required "A key is required!" $v.secrets.password }}
+            {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
