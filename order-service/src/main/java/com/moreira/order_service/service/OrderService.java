@@ -4,15 +4,20 @@ import com.moreira.order_service.mapper.OrderMapper;
 import com.moreira.order_service.model.Order;
 import com.moreira.order_service.models.OrderEntity;
 import com.moreira.order_service.models.OrderServiceModel;
+import com.moreira.order_service.models.PriceSummaryRecord;
+import com.moreira.order_service.models.PriceSummaryServiceModel;
 import com.moreira.order_service.repository.OrderRepository;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.auditing.CurrentDateTimeProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -60,6 +65,26 @@ public class OrderService {
         orderEntity.setPrice(orderServiceModel.getPrice());
 
         return orderMapper.orderEntityToOrderServiceModel(orderRepository.saveAndFlush(orderEntity));
+
+    }
+
+    public List<PriceSummaryServiceModel> calculatePriceSummaries(LocalDate startDate, LocalDate endDate) throws IllegalArgumentException {
+
+        if (startDate != null && endDate != null) {
+            if (startDate.isAfter(endDate)) {
+                throw new IllegalArgumentException("data-inizio is after data-fine");
+            }
+            return orderMapper.priceSummaryRecordToPriceSummaryServiceModel(orderRepository.countPriceSummaryForCustomer(startDate, endDate));
+        } else {
+
+            LocalDate today = LocalDate.now();
+
+            LocalDate previousMonthStart = today.minusMonths(1).with(TemporalAdjusters.firstDayOfMonth());
+            LocalDate previousMonthEnd = today.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+
+            return orderMapper.priceSummaryRecordToPriceSummaryServiceModel(orderRepository.countPriceSummaryForCustomer(previousMonthStart, previousMonthEnd));
+
+        }
 
     }
 

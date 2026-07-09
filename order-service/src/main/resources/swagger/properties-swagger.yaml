@@ -72,3 +72,28 @@ paths:
           $ref: './commons.yaml#/components/responses/MessageResponse'
         "500":
           $ref: './commons.yaml#/components/responses/MessageResponse'
+
+  /orders/summary:
+    get:
+      tags:
+        - Order
+      summary: Return list of summary expense for each customer
+      operationId: getSummaryForEachCustomer
+      parameters:
+        - name: data-inizio
+          in: query
+          required: false
+          schema:
+            $ref: './commons.yaml#/components/schemas/Date'
+        - name: data-fine
+          in: query
+          required: false
+          schema:
+            $ref: './commons.yaml#/components/schemas/Date'
+      responses:
+        "200":
+          $ref: './commons.yaml#/components/responses/PriceSummaryResponseList'
+        "400":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+        "500":
+          $ref: './commons.yaml#/components/responses/MessageResponse'

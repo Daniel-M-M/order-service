@@ -3,6 +3,7 @@ package IT;
 import com.moreira.order_service.OrderServiceApplication;
 import com.moreira.order_service.mapper.OrderMapper;
 import com.moreira.order_service.model.Order;
+import com.moreira.order_service.model.PriceSummary;
 import com.moreira.order_service.service.OrderService;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -120,12 +122,12 @@ public class OrderTest {
                         order.getDataOrder()
                 ));
 
-        //Assert for each element lambda func TODO: rifare nel modo che era prima cosi non sai cosa falisce
-        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getName().equals(order.getName())
-                && order1.getCognome().equals(order.getCognome())
-                && order1.getDataOrder().equals(order.getDataOrder())
-                && order1.getEmail().equals(order.getEmail())
-                && order1.getPrice().equals(order.getPrice())));
+        //Assert for each element lambda func
+        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getName().equals(order.getName())));
+        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getCognome().equals(order.getCognome())));
+        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getDataOrder().equals(order.getDataOrder())));
+        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getEmail().equals(order.getEmail())));
+        assertTrue(ordersResponse.stream().anyMatch(order1 -> order1.getPrice().equals(order.getPrice())));
 
     }
 
@@ -180,6 +182,80 @@ public class OrderTest {
                 .usingRecursiveComparison()
                 .ignoringFields("uuid")
                 .isEqualTo(order);
+
+    }
+
+    @Test
+    public void PriceSummaryTestGet(){
+
+        Order requestPayload = new Order(
+                "Filippo",
+                "Verdi",
+                "verdi.f@gmail.com",
+                LocalDate.parse("2026-07-09"),
+                Double.parseDouble("10.00")
+        );
+
+        Order order = given()
+                .contentType(ContentType.JSON)
+                .body(requestPayload)
+                .post("/orders")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(Order.class);
+
+        Order requestPayload2 = new Order(
+                "Filippo",
+                "Verdi",
+                "verdi.f@gmail.com",
+                LocalDate.parse("2026-07-09"),
+                Double.parseDouble("10.00")
+        );
+
+        Order order2 = given()
+                .contentType(ContentType.JSON)
+                .body(requestPayload2)
+                .post("/orders")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(Order.class);
+
+        List<PriceSummary> ordersResponse = given()
+                .queryParam("data-inizio", "2026-06-01")
+                .queryParam("data-fine", "2026-07-10")
+                .when()
+                .get("/orders/summary")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(new TypeRef<List<PriceSummary>>() {});
+
+        //Assert for each element contains on response list
+        assertThat(ordersResponse)
+                .extracting(
+                        PriceSummary::getCustomer,
+                        PriceSummary::getTotal // Assicurati che il nome del metodo sia corretto nella tua classe PriceSummary
+                )
+                .contains(tuple(
+                        "Verdi Filippo",
+                        20.00
+                ));
+
+        //Assert for each element lambda func
+        assertTrue(ordersResponse.stream().anyMatch(order1 -> {
+            assert order1.getCustomer() != null;
+            return order1.getCustomer().equals(order.getCognome().concat(" ").concat(order.getName()));
+        }));
+        assertTrue(ordersResponse.stream().anyMatch(order1 -> {
+            assert order1.getCustomer() != null;
+            return order1.getCustomer().equals(order2.getCognome().concat(" ").concat(order2.getName()));
+        }));
+        assertTrue(ordersResponse.stream().anyMatch(order1 -> {
+            assert order1.getTotal() != null;
+            return order1.getTotal().equals(order.getPrice() + order2.getPrice());
+        }));
 
     }
 

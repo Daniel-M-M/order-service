@@ -31,7 +31,31 @@ components:
             items:
               $ref: '#/components/schemas/Order'
 
+    PriceSummaryResponse:
+      description: Sum of expenses for a customer
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PriceSummary'
+
+    PriceSummaryResponseList:
+      description: List of expenses for each customer
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PriceSummary'
+
   schemas:
+    PriceSummary:
+      type: object
+      properties:
+        customer:
+          type: string
+        total:
+          $ref: '#/components/schemas/price'
+
     Order:
       type: object
       properties:
