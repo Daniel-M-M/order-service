@@ -1,5 +1,7 @@
 package IT;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moreira.order_service.OrderServiceApplication;
 import com.moreira.order_service.mapper.OrderMapper;
 import com.moreira.order_service.model.Order;
@@ -7,6 +9,8 @@ import com.moreira.order_service.model.PriceSummary;
 import com.moreira.order_service.service.OrderService;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
+import io.restassured.config.ObjectMapperConfig;
+import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +20,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -62,10 +66,10 @@ public class OrderTest {
             .contentType(ContentType.JSON)
             .body(requestPayload)
             .post("/orders")
-                .then()
-                .statusCode(200)
-                .extract()
-                .as(Order.class);
+            .then()
+            .statusCode(200)
+            .extract()
+            .as(Order.class);
 
         assertNotNull(responseOrder.getDataOrder(), "La data dell'ordine non deve essere null");
         assertEquals("Francesco", responseOrder.getName());
@@ -106,7 +110,8 @@ public class OrderTest {
                 .then()
                 .statusCode(200)
                 .extract()
-                .as(new TypeRef<List<Order>>() {});
+                .as(new TypeRef<>() {
+                });
 
         assertThat(order.getDataOrder()).isNotNull();
         assertThat(ordersResponse.getFirst().getDataOrder()).isNotNull();
@@ -222,15 +227,28 @@ public class OrderTest {
                 .extract()
                 .as(Order.class);
 
+//        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+//
+//        RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
+//                ObjectMapperConfig.objectMapperConfig().jackson2ObjectMapperFactory((type, s) -> objectMapper)
+//        );
+        LocalDate inizio = LocalDate.of(2026, 6, 1);
+        LocalDate fine = LocalDate.of(2026, 7, 10);
+
         List<PriceSummary> ordersResponse = given()
-                .queryParam("data-inizio", "2026-06-01")
-                .queryParam("data-fine", "2026-07-10")
+                .contentType(ContentType.JSON)
+//                .param("data-inizio", inizio.format(DateTimeFormatter.ISO_DATE))
+//                .param("data-fine", fine.format(DateTimeFormatter.ISO_DATE))
                 .when()
-                .get("/orders/summary")
+                .get("/orders/summary?data-inizio=2026-06-01&data-fine=2026-07-01")
                 .then()
+                .log().all()
                 .statusCode(200)
                 .extract()
-                .as(new TypeRef<List<PriceSummary>>() {});
+                .as(new TypeRef<List<PriceSummary>>() {
+                });
+
+        System.out.println("RISPOSTA SERVER: " + ordersResponse);
 
         //Assert for each element contains on response list
         assertThat(ordersResponse)

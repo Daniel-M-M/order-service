@@ -1,6 +1,5 @@
 package com.moreira.order_service.repository;
 
-import com.moreira.order_service.model.PriceSummary;
 import com.moreira.order_service.models.OrderEntity;
 import com.moreira.order_service.models.PriceSummaryRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,7 +14,7 @@ import java.util.UUID;
 @Repository
 public interface OrderRepository extends JpaRepository<OrderEntity, UUID> {
 
-    @Query(value = "SELECT CONCAT_WS(' ', o.cognome, o.name) AS cliente, SUM(o.price) AS totale " +
+    @Query(value = "SELECT CONCAT_WS(' ', o.cognome, o.name) AS customer, SUM(o.price) AS total " +
                     "FROM orders o " +
                     "WHERE o.data_order >= :startDate AND o.data_order < :endDate " +
                     "GROUP BY o.email, o.name, o.cognome " +

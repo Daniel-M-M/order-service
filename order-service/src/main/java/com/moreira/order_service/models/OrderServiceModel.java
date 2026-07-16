@@ -2,7 +2,6 @@ package com.moreira.order_service.models;
 
 import lombok.Data;
 
-import java.text.DecimalFormat;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;

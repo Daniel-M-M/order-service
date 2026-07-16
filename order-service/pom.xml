@@ -279,9 +279,16 @@
 					</execution>
 					<execution>
 						<id>build-application-image</id>
-						<phase>install</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>build</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>push-application-image</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>push</goal>
 						</goals>
 					</execution>
 				</executions>
@@ -316,7 +323,7 @@
 									<prefix>postgres-16-order</prefix>
 								</log>
 								<wait>
-									<!-- Regular expression which is applied against the log output of an container
+									<!-- Regular expression which is applied against the log output of a container
 											and blocks until the pattern is matched. You can use (?s) in the pattern
 											to switch on multi line matching. -->
 									<!-- NOTA: su windows log non funziona-->
@@ -329,7 +336,8 @@
 							</run>
 						</image>
 						<image>
-							<name>order_service:1.0.0</name>
+							<name>localhost:5000/order_service:1.0.1</name>
+							<registry>localhost:5000</registry>
 							<build>
 								<dockerFile>${project.basedir}/src/main/resources/docker/Dockerfile</dockerFile>
 								<contextDir>${project.basedir}</contextDir>
@@ -348,6 +356,53 @@
 					<excludes>
 						<exclude>**/IT/**</exclude>
 					</excludes>
+				</configuration>
+			</plugin>
+			<!-- jkube -->
+<!--			<plugin>-->
+<!--				<groupId>org.eclipse.jkube</groupId>-->
+<!--				<artifactId>kubernetes-maven-plugin</artifactId>-->
+<!--				<version>1.19.0</version>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<id>build-application-image</id>-->
+<!--						<phase>install</phase>-->
+<!--						<goals>-->
+<!--							<goal>build</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--					&lt;!&ndash;					<execution>&ndash;&gt;-->
+<!--					&lt;!&ndash;						<id>push-application-image</id>&ndash;&gt;-->
+<!--					&lt;!&ndash;						<phase>deploy</phase>&ndash;&gt;-->
+<!--					&lt;!&ndash;						<goals>&ndash;&gt;-->
+<!--					&lt;!&ndash;							<goal>push</goal>&ndash;&gt;-->
+<!--					&lt;!&ndash;						</goals>&ndash;&gt;-->
+<!--					&lt;!&ndash;					</execution>&ndash;&gt;-->
+<!--				</executions>-->
+<!--				<configuration>-->
+<!--					<images>-->
+<!--						<image>-->
+<!--							<name>localhost:5000/order_service:1.0.0</name>-->
+<!--							<registry>localhost:5000</registry>-->
+<!--							<alias>order-service</alias>-->
+<!--							<build>-->
+<!--								<dockerFile>${project.basedir}/src/main/resources/docker/Dockerfile</dockerFile>-->
+<!--								<contextDir>${project.basedir}</contextDir>-->
+<!--								<filter>@</filter>-->
+<!--							</build>-->
+<!--						</image>-->
+<!--					</images>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
+			<!-- Sonatype -->
+			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.9.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>central</publishingServerId>
+					<skipPublishing>true</skipPublishing>
 				</configuration>
 			</plugin>
 		</plugins>
