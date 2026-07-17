@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
 
@@ -31,6 +32,6 @@ public class OrderEntity {
 
     private Date dataOrder;
 
-    private Double price;
+    private BigDecimal price;
 
 }

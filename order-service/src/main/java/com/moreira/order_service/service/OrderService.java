@@ -68,13 +68,13 @@ public class OrderService {
 
     }
 
-    public List<PriceSummaryServiceModel> calculatePriceSummaries(LocalDate startDate, LocalDate endDate) throws IllegalArgumentException {
+    public List<PriceSummaryServiceModel> calculatePriceSummaries(LocalDate dataInizio, LocalDate dataFine) throws IllegalArgumentException {
 
-        if (startDate != null && endDate != null) {
-            if (startDate.isAfter(endDate)) {
+        if (dataInizio != null && dataFine != null) {
+            if (dataInizio.isAfter(dataFine)) {
                 throw new IllegalArgumentException("data-inizio is after data-fine");
             }
-            return orderMapper.priceSummaryRecordToPriceSummaryServiceModel(orderRepository.countPriceSummaryForCustomer(startDate, endDate));
+            return orderMapper.priceSummaryRecordToPriceSummaryServiceModel(orderRepository.countPriceSummaryForCustomer(dataInizio, dataFine));
         } else {
 
             LocalDate today = LocalDate.now();

@@ -2,6 +2,7 @@ package com.moreira.order_service.models;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
@@ -15,6 +16,6 @@ public class OrderServiceModel {
     private String cognome;
     private String email;
     private Date dataOrder;
-    private Double price;
+    private BigDecimal price;
 
 }

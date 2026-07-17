@@ -1,7 +1,5 @@
 package IT;
 
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moreira.order_service.OrderServiceApplication;
 import com.moreira.order_service.mapper.OrderMapper;
 import com.moreira.order_service.model.Order;
@@ -9,9 +7,8 @@ import com.moreira.order_service.model.PriceSummary;
 import com.moreira.order_service.service.OrderService;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
-import io.restassured.config.ObjectMapperConfig;
-import io.restassured.config.RestAssuredConfig;
 import io.restassured.http.ContentType;
+import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +18,6 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -197,7 +193,7 @@ public class OrderTest {
                 "Filippo",
                 "Verdi",
                 "verdi.f@gmail.com",
-                LocalDate.parse("2026-07-09"),
+                LocalDate.parse("2026-07-01"),
                 Double.parseDouble("10.00")
         );
 
@@ -232,23 +228,35 @@ public class OrderTest {
 //        RestAssured.config = RestAssuredConfig.config().objectMapperConfig(
 //                ObjectMapperConfig.objectMapperConfig().jackson2ObjectMapperFactory((type, s) -> objectMapper)
 //        );
-        LocalDate inizio = LocalDate.of(2026, 6, 1);
-        LocalDate fine = LocalDate.of(2026, 7, 10);
 
-        List<PriceSummary> ordersResponse = given()
+//        List<PriceSummary> ordersResponse = given()
+//                .contentType(ContentType.JSON)
+//                .param("data-inizio", "2026-07-01")
+//                .param("data-fine", "2026-07-10")
+//                .when()
+//                .get("/orders/summary")
+//                .then()
+//                .log().all()
+//                .statusCode(200)
+//                .extract()
+//                .as(new TypeRef<List<PriceSummary>>() {
+//                });
+
+        Response response = given()
                 .contentType(ContentType.JSON)
-//                .param("data-inizio", inizio.format(DateTimeFormatter.ISO_DATE))
-//                .param("data-fine", fine.format(DateTimeFormatter.ISO_DATE))
+                .queryParam("data-inizio", "2026-07-01")
+                .queryParam("data-fine", "2026-07-10")
                 .when()
-                .get("/orders/summary?data-inizio=2026-06-01&data-fine=2026-07-01")
+                .get("/orders/summary")
                 .then()
-                .log().all()
+                .log().ifValidationFails() // Logga solo se il test fallisce
                 .statusCode(200)
                 .extract()
-                .as(new TypeRef<List<PriceSummary>>() {
-                });
+                .response();
 
-        System.out.println("RISPOSTA SERVER: " + ordersResponse);
+        //System.out.println("RISPOSTA SERVER: " + response);
+
+        List<PriceSummary> ordersResponse = response.as(new TypeRef<List<PriceSummary>>() {});
 
         //Assert for each element contains on response list
         assertThat(ordersResponse)

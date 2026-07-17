@@ -41,9 +41,9 @@ public class OrderController implements OrderApi {
     }
 
     @Override
-    public ResponseEntity<List<PriceSummary>> getSummaryForEachCustomer(LocalDate startDate, LocalDate endDate) {
+    public ResponseEntity<List<PriceSummary>> getSummaryForEachCustomer(LocalDate dataInizio, LocalDate dataFine) {
 
-        return ResponseEntity.ok(orderMapper.priceSummaryServiceModelToPriceSummary(orderService.calculatePriceSummaries(startDate, endDate)));
+        return ResponseEntity.ok(orderMapper.priceSummaryServiceModelToPriceSummary(orderService.calculatePriceSummaries(dataInizio, dataFine)));
     }
 
 }

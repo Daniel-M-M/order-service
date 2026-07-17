@@ -38,10 +38,12 @@ public interface OrderMapper {
 
     @Mapping(target = "data", source = "date")
     @Mapping(target = "uuid", source = "id")
+    @Mapping(target = "price", source = "price", qualifiedByName = "bigDecimalToDouble")
     public Order orderServiceModelToOrder(OrderServiceModel order);
 
     @Mapping(target = "data", source = "date")
     @Mapping(target = "uuid", source = "id")
+    @Mapping(target = "price", source = "price", qualifiedByName = "bigDecimalToDouble")
     public List<Order> orderServiceModelToOrder(List<OrderServiceModel> order);
 
     @Mapping(target = "date", source = "data")
@@ -52,12 +54,22 @@ public interface OrderMapper {
     @Mapping(target = "id", source = "uuid")
     public List<OrderServiceModel> orderToOrderServiceModel(List<Order> order);
 
-    @Mapping(target = "total", source = "total", qualifiedByName = "bigDecimalToDouble")
     public PriceSummaryServiceModel priceSummaryRecordToPriceSummaryServiceModel(PriceSummaryRecord priceSummaryRecord);
-
     public List<PriceSummaryServiceModel> priceSummaryRecordToPriceSummaryServiceModel(List<PriceSummaryRecord> priceSummaryRecord);
+
+    @Mapping(target = "total", source = "total", qualifiedByName = "bigDecimalToDouble")
     public PriceSummary priceSummaryServiceModelToPriceSummary(PriceSummaryServiceModel priceSummaryServiceModel);
+
+    @Mapping(target = "total", source = "total", qualifiedByName = "bigDecimalToDouble")
     public List<PriceSummary> priceSummaryServiceModelToPriceSummary(List<PriceSummaryServiceModel> priceSummaryServiceModel);
+
+    @Named("bigDecimalToDouble")
+    default Double bigDecimalToDouble(BigDecimal bigDecimal) {
+        if (bigDecimal == null) {
+            return null;
+        }
+        return bigDecimal.doubleValue();
+    }
 
     default LocalDate map(Instant instant) {
         if (instant == null) {
@@ -74,12 +86,5 @@ public interface OrderMapper {
         return value.atStartOfDay(ZoneOffset.UTC).toInstant();
     }
 
-    @Named("bigDecimalToDouble")
-    default double bigDecimalToDouble(BigDecimal bigDecimal) {
-        if (bigDecimal == null) {
-            return 0.0; // Oppure gestisci un valore di default
-        }
-        return bigDecimal.doubleValue();
-    }
 
 }
