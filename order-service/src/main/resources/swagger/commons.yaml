@@ -48,6 +48,7 @@ components:
               $ref: '#/components/schemas/PriceSummary'
 
   schemas:
+
     PriceSummary:
       type: object
       properties:
@@ -139,3 +140,29 @@ components:
       type: string
       format: uuid
       example: "550e8400-e29b-41d4-a716-446655440000"
+  #
+  #    #Site swagger for implement oauth2
+  #    securitySchemes:
+  #      KeycloakAuth:
+  #        type: oauth2
+  #        description: Autenticazione Keycloak OAuth2
+  #        flows:
+  #          authorizationCode:
+  #            authorizationUrl: https://<tuo-dominio-keycloak>/auth/realms/<tuo-realm>/protocol/openid-connect/auth
+  #            tokenUrl: https://<tuo-dominio-keycloak>/auth/realms/<tuo-realm>/protocol/openid-connect/token
+  #            scopes:
+  #              openid: Accesso standard OpenID
+  #              profile: Informazioni sul profilo
+  #
+  securitySchemes:
+    KeycloakAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: http://localhost:8081/realms/foodmanager/protocol/openid-connect/auth
+          tokenUrl: https://localhost:8081/realms/foodmanager/protocol/openid-connect/token
+          scopes:
+            openid: OpenID Connect
+            profile: User Profile
+            read_access: Permesso di lettura
+            write_access: Permesso di scrittura

@@ -22,6 +22,29 @@ services:
       options:
         max-size: "200k"
         max-file: "5"
+
+  keycloak-postgresql:
+    image: postgres:16.8
+    ports:
+      - 5435:5432
+    volumes:
+      - ./db_keycloak :/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: password
+      POSTGRES_HOST_AUTH_METHOD: trust
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        max-file: "5"
+
   order-be:
     image: localhost:5000/order_service:1.0.0
     container_name: order-service-be
@@ -34,3 +57,24 @@ services:
       DB_PASSWORD: example
     depends_on:
       - postgres
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.7.0
+    container_name: keycloak
+    command: start-dev
+    restart: always
+    ports:
+      - 8081:8080
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_SPI_ADMIN_REALM: master
+      KEYCLOAK_HTTP_RELATIVE_PATH: /
+
+      DB_VENDOR: POSTGRES
+      DB_ADDR: keycloak-postgresql
+      DB_DATABASE: keycloak
+      DB_USER: keycloak
+      DB_PASSWORD: password
+    depends_on:
+      - keycloak-postgresql
