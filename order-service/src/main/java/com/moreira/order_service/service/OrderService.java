@@ -1,23 +1,19 @@
 package com.moreira.order_service.service;
 
 import com.moreira.order_service.mapper.OrderMapper;
-import com.moreira.order_service.model.Order;
 import com.moreira.order_service.models.OrderEntity;
 import com.moreira.order_service.models.OrderServiceModel;
-import com.moreira.order_service.models.PriceSummaryRecord;
 import com.moreira.order_service.models.PriceSummaryServiceModel;
 import com.moreira.order_service.repository.OrderRepository;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.auditing.CurrentDateTimeProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -35,7 +31,6 @@ public class OrderService {
     public List<OrderServiceModel> getOrders(Long page, Long size) {
 
         Pageable pageWithElements = PageRequest.of(page.intValue(), size.intValue());
-
         Page<OrderEntity> orderPage = orderRepository.findAll(pageWithElements);
 
         return orderMapper.orderEntityToOrderServiceModel(orderPage.getContent());
@@ -46,9 +41,7 @@ public class OrderService {
         Optional<OrderEntity> order = orderRepository.findById(id);
 
         if (order.isEmpty()) {
-
             throw new NoSuchElementException("Order not found");
-
         }
 
         return orderMapper.orderEntityToOrderServiceModel(order.get());
@@ -56,6 +49,7 @@ public class OrderService {
     }
 
     public OrderServiceModel createOrder(OrderServiceModel orderServiceModel) {
+
         OrderEntity orderEntity = new OrderEntity();
         orderEntity.setCreatedOn(Instant.now());
         orderEntity.setName(orderServiceModel.getName());
@@ -74,11 +68,11 @@ public class OrderService {
             if (dataInizio.isAfter(dataFine)) {
                 throw new IllegalArgumentException("data-inizio is after data-fine");
             }
+
             return orderMapper.priceSummaryRecordToPriceSummaryServiceModel(orderRepository.countPriceSummaryForCustomer(dataInizio, dataFine));
         } else {
 
             LocalDate today = LocalDate.now();
-
             LocalDate previousMonthStart = today.minusMonths(1).with(TemporalAdjusters.firstDayOfMonth());
             LocalDate previousMonthEnd = today.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
 

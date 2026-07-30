@@ -6,12 +6,18 @@ import com.moreira.order_service.model.PriceSummary;
 import com.moreira.order_service.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+//TODO: correct the grant access for each
+//TODO: create order by user.
 @RestController
 public class OrderController implements OrderApi {
 
@@ -23,20 +29,47 @@ public class OrderController implements OrderApi {
 
     @Override
     public ResponseEntity<Order> createOrder(Order order) {
-        System.out.println("starting the createOrder");
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Only to print a token values
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+            Jwt jwt = jwtAuth.getToken();
+            String username = jwt.getClaimAsString("preferred_username");
+            String email = jwt.getClaimAsString("email");
+
+            System.out.println("Utente autenticato via Keycloak: " + username + " (" + email + ")");
+        }
+
         return ResponseEntity.ok(orderMapper.orderServiceModelToOrder(orderService.createOrder(orderMapper.orderToOrderServiceModel(order))));
     }
 
     @Override
     public ResponseEntity<Order> getOrder(UUID uuidOrder) {
-
-        System.out.println("starting the getOrder");
         return ResponseEntity.ok(orderMapper.orderServiceModelToOrder(orderService.getOrder(uuidOrder)));
     }
 
     @Override
     public ResponseEntity<List<Order>> getOrders(Long page, Long size) {
-        System.out.println("starting the getOrders");
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        //System.out.println("token Keycloak: " + authentication);
+
+        if (authentication instanceof JwtAuthenticationToken jwtAuth) {
+
+            Jwt jwt = jwtAuth.getToken();
+            String username = jwt.getClaimAsString("preferred_username");
+            String email = jwt.getClaimAsString("email");
+            String role = Optional.ofNullable((Map<String, Object>) jwt.getClaim("resource_access"))
+                    .map(resourceAccess -> (Map<String, Object>) resourceAccess.get("foodmanager"))
+                    .map(foodmanager -> (Collection<String>) foodmanager.get("roles"))
+                    .flatMap(roles -> roles.stream().findFirst()).orElse(null);
+
+            // TODO: just for testing to verify only ROLE_FOODMANAGER_CLIENT
+            if (Objects.equals(role, "ROLE_FOODMANAGER_CLIENT")){
+                throw new AccessDeniedException("Access denied: Insufficient role or permissions.");
+            }
+        }
         return ResponseEntity.ok(orderMapper.orderServiceModelToOrder(orderService.getOrders(page, size)));
     }
 

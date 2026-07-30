@@ -44,6 +44,8 @@ public class SecurityConfig {
                         s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2Login(Customizer.withDefaults())
                 .oauth2Client(Customizer.withDefaults())
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt(Customizer.withDefaults()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(a -> a
