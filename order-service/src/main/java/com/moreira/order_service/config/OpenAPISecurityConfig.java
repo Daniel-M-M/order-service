@@ -13,18 +13,19 @@ public class OpenAPISecurityConfig {
 
     @Value("${keycloak.auth-server-url}")
     String authServerUrl;
+
     @Value("${keycloak.realm}")
     String realm;
 
-    private static final String OAUTH_SCHEME_NAME = "my_oAuth_security_schema";
+    private static final String OAUTH_SCHEME_NAME = "Keycloak";
 
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI().components(new Components()
                         .addSecuritySchemes(OAUTH_SCHEME_NAME, createOAuthScheme()))
                 .addSecurityItem(new SecurityRequirement().addList(OAUTH_SCHEME_NAME))
-                .info(new Info().title("Todos Management Service")
-                        .description("A service providing todos.")
+                .info(new Info().title("Order Service")
+                        .description("Service for orders.")
                         .version("1.0"));
     }
 

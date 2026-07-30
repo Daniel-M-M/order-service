@@ -10,6 +10,7 @@ servers:
 
 tags:
   - name: Order
+  - name: Customer
 
 components:
   securitySchemes:
@@ -99,6 +100,68 @@ paths:
       responses:
         "200":
           $ref: './commons.yaml#/components/responses/PriceSummaryResponseList'
+        "400":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+        "500":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+
+  /customers/{userName}/orders:
+    get:
+      tags:
+        - Customer
+      summary: Return list of order for the customer
+      operationId: getCustomerOrders
+      parameters:
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: size
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          $ref: './commons.yaml#/components/responses/OrderResponseList'
+        "400":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+        "500":
+          $ref: './commons.yaml#/components/responses/MessageResponse'
+
+  /customers/{userName}/orders/summary:
+    get:
+      tags:
+        - Customer
+      summary: Return summary expense for a customer
+      operationId: getCustomerSummary
+      parameters:
+        - name: userName
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: data-inizio
+          in: query
+          required: false
+          schema:
+            $ref: './commons.yaml#/components/schemas/Date'
+        - name: data-fine
+          in: query
+          required: false
+          schema:
+            $ref: './commons.yaml#/components/schemas/Date'
+      responses:
+        "200":
+          $ref: './commons.yaml#/components/responses/PriceSummaryResponse'
         "400":
           $ref: './commons.yaml#/components/responses/MessageResponse'
         "500":

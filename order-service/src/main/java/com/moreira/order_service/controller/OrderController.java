@@ -16,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.*;
 
-//TODO: correct the grant access for each
-//TODO: create order by user.
 @RestController
 public class OrderController implements OrderApi {
 
@@ -32,13 +30,13 @@ public class OrderController implements OrderApi {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        // Only to print a token values
         if (authentication instanceof JwtAuthenticationToken jwtAuth) {
-            Jwt jwt = jwtAuth.getToken();
-            String username = jwt.getClaimAsString("preferred_username");
-            String email = jwt.getClaimAsString("email");
 
-            System.out.println("Utente autenticato via Keycloak: " + username + " (" + email + ")");
+            Jwt jwt = jwtAuth.getToken();
+            order.setName(jwt.getClaimAsString("given_name"));
+            order.setCognome(jwt.getClaimAsString("family_name"));
+            order.setEmail(jwt.getClaimAsString("email"));
+
         }
 
         return ResponseEntity.ok(orderMapper.orderServiceModelToOrder(orderService.createOrder(orderMapper.orderToOrderServiceModel(order))));
@@ -51,32 +49,46 @@ public class OrderController implements OrderApi {
 
     @Override
     public ResponseEntity<List<Order>> getOrders(Long page, Long size) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        //System.out.println("token Keycloak: " + authentication);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication instanceof JwtAuthenticationToken jwtAuth) {
 
             Jwt jwt = jwtAuth.getToken();
-            String username = jwt.getClaimAsString("preferred_username");
-            String email = jwt.getClaimAsString("email");
             String role = Optional.ofNullable((Map<String, Object>) jwt.getClaim("resource_access"))
                     .map(resourceAccess -> (Map<String, Object>) resourceAccess.get("foodmanager"))
                     .map(foodmanager -> (Collection<String>) foodmanager.get("roles"))
                     .flatMap(roles -> roles.stream().findFirst()).orElse(null);
 
-            // TODO: just for testing to verify only ROLE_FOODMANAGER_CLIENT
-            if (Objects.equals(role, "ROLE_FOODMANAGER_CLIENT")){
+            if (Objects.equals(role, "ROLE_FOODMANAGER_USER")){
                 throw new AccessDeniedException("Access denied: Insufficient role or permissions.");
             }
         }
         return ResponseEntity.ok(orderMapper.orderServiceModelToOrder(orderService.getOrders(page, size)));
+
     }
 
     @Override
     public ResponseEntity<List<PriceSummary>> getSummaryForEachCustomer(LocalDate dataInizio, LocalDate dataFine) {
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!(authentication instanceof JwtAuthenticationToken jwtAuth)) {
+            throw new AccessDeniedException("Access denied: Invalid Token.");
+        }
+
+        Jwt jwt = jwtAuth.getToken();
+        String role = Optional.ofNullable((Map<String, Object>) jwt.getClaim("resource_access"))
+                .map(resourceAccess -> (Map<String, Object>) resourceAccess.get("foodmanager"))
+                .map(foodmanager -> (Collection<String>) foodmanager.get("roles"))
+                .flatMap(roles -> roles.stream().findFirst()).orElse(null);
+
+        if (Objects.equals(role, "ROLE_FOODMANAGER_USER")) {
+            throw new AccessDeniedException("Access denied: Insufficient role or permissions.");
+        }
+
         return ResponseEntity.ok(orderMapper.priceSummaryServiceModelToPriceSummary(orderService.calculatePriceSummaries(dataInizio, dataFine)));
+
     }
 
 }

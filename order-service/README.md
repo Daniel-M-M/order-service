@@ -159,3 +159,50 @@ token: eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5ZjkyOWYwYS1jZTdlLTQ5O
 Client ID: foodmanager
 
 CLient Secret: BP9654GivSS4Ly028TutmIDKByOXlz9967ECW5QazEsEDa0O7hBEBNiFHRcfnHfsX94ddijxNuZiiS71mAWmSt
+    
+    Token Payload: 
+    
+    {
+    "exp": 1785441067,
+    "iat": 1785440767,
+    "auth_time": 1785440767,
+    "jti": "onrtac:ee9a333f-2a37-5d15-9546-8246ddf262e6",
+    "iss": "http://localhost:8081/realms/foodmanager",
+    "aud": "account",
+    "sub": "6830952e-7a52-49e3-8373-f56a5d6d526d",
+    "typ": "Bearer",
+    "azp": "foodmanager",
+    "sid": "40_xWW3_tW2LQxAa6K93iux1",
+    "acr": "1",
+    "allowed-origins": [
+    "*"
+    ],
+    "realm_access": {
+        "roles": [
+            "offline_access",
+            "uma_authorization",
+            "default-roles-foodmanager"
+        ]
+    },
+    "resource_access": {
+        "foodmanager": {
+            "roles": [
+                "ROLE_FOODMANAGER_USER"
+            ]
+            },
+        "account": {
+            "roles": [
+                "manage-account",
+                "manage-account-links",
+                "view-profile"
+            ]
+        }
+    },
+    "scope": "email profile",
+    "email_verified": true,
+    "name": "Marco Bianchi",
+    "preferred_username": "mbianchi",
+    "given_name": "Marco",
+    "family_name": "Bianchi",
+    "email": "m.bianchi@gmail.com"
+    }
