@@ -158,7 +158,7 @@ token: eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5ZjkyOWYwYS1jZTdlLTQ5O
 
 Client ID: foodmanager
 
-CLient Secret: BP9654GivSS4Ly028TutmIDKByOXlz9967ECW5QazEsEDa0O7hBEBNiFHRcfnHfsX94ddijxNuZiiS71mAWmSt
+CLient Secret: lvZ1F3cMfFVVQ4KnbEZzJsAin944FbWwSKZdA8HnF8mBaaE7idG1Gny7hHnpwQYxpjGs4Wx8NitjoGpGmkMh7d
     
     Token Payload: 
     
@@ -206,3 +206,9 @@ CLient Secret: BP9654GivSS4Ly028TutmIDKByOXlz9967ECW5QazEsEDa0O7hBEBNiFHRcfnHfsX
     "family_name": "Bianchi",
     "email": "m.bianchi@gmail.com"
     }
+
+Link to [Integration-test-keycloak](https://www.baeldung.com/spring-boot-keycloak-integration-testing)
+
+**Command to keycloak file** 
+
+    docker exec -it 59d393242b3f /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/import --realm foodmanager --users realm_file
