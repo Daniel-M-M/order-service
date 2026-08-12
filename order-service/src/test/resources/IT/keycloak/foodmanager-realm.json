@@ -475,7 +475,7 @@
     } ],
     "disableableCredentialTypes" : [ ],
     "requiredActions" : [ ],
-    "realmRoles" : [ "default-roles-foodmanager" ],
+    "realmRoles" : [ "default-roles-foodmanager", "ROLE_FOODMANAGER_USER" ],
     "notBefore" : 0,
     "groups" : [ ]
   }, {

@@ -31,52 +31,38 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-@Testcontainers
 @SpringBootTest(classes = {OrderServiceApplication.class},
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "spring.flyway.enabled=false")
 @TestPropertySource(locations = {"classpath:IT/application-test.properties"})
 public class OrderTest {
 
-    @Autowired
-    private OrderService orderService;
-
-    @Autowired
-    private OrderMapper orderMapper;
-
     @LocalServerPort
     private int port;
 
-    // Configure the Keycloak container, launched by Testcontainers
-    @Container
-    static KeycloakContainer keycloak = new KeycloakContainer("quay.io/keycloak/keycloak:26.7.0")
-            .withRealmImportFile("IT/keycloak/foodmanager-realm.json");
+    private String adminToken;
+    private String userToken;
 
-    @DynamicPropertySource
-    static void keycloakProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri",
-                () -> keycloak.getIssuerUrl("foodmanager"));
+    private String obtainAccessToken(String username, String password) {
+        Response response = given()
+                .contentType(ContentType.URLENC)
+                .formParam("client_id", "foodmanager")
+                .formParam("client_secret", "lvZ1F3cMfFVVQ4KnbEZzJsAin944FbWwSKZdA8HnF8mBaaE7idG1Gny7hHnpwQYxpjGs4Wx8NitjoGpGmkMh7d")
+                .formParam("grant_type", "password")
+                .formParam("username", username)
+                .formParam("password", password)
+                .post("http://localhost:8080/realms/foodmanager/protocol/openid-connect/token");
+
+        return response.jsonPath().getString("access_token");
     }
-
-    private final String adminToken = keycloak.getAccessToken(
-            "foodmanager",
-            "foodmanager",
-            "lvZ1F3cMfFVVQ4KnbEZzJsAin944FbWwSKZdA8HnF8mBaaE7idG1Gny7hHnpwQYxpjGs4Wx8NitjoGpGmkMh7d",
-            "dmoreiramariniello",
-            "Dmm23Gio");
-
-    //To use in CustomerOrderTest
-    private final String userToken = keycloak.getAccessToken(
-            "foodmanager",
-            "foodmanager",
-            "lvZ1F3cMfFVVQ4KnbEZzJsAin944FbWwSKZdA8HnF8mBaaE7idG1Gny7hHnpwQYxpjGs4Wx8NitjoGpGmkMh7d",
-            "mbianchi",
-            "MBianchi");
 
     @BeforeEach
     void setUp() {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
+
+        this.adminToken = obtainAccessToken("dmoreiramariniello", "Dmm23Gio");
+        this.userToken  = obtainAccessToken("mbianchi", "MBianchi");
     }
 
     @Test
@@ -126,6 +112,7 @@ public class OrderTest {
                 .post("/orders")
                 .then()
                 .statusCode(200)
+                .log().headers()
                 .extract()
                 .as(Order.class);
 

@@ -377,6 +377,39 @@
 							</run>
 						</image>
 						<image>
+							<alias>keycloak-auth</alias>
+							<name>quay.io/keycloak/keycloak:26.7.0</name>
+							<run>
+								<env>
+									<KC_BOOTSTRAP_ADMIN_USERNAME>admin</KC_BOOTSTRAP_ADMIN_USERNAME>
+									<KC_BOOTSTRAP_ADMIN_PASSWORD>admin</KC_BOOTSTRAP_ADMIN_PASSWORD>
+								</env>
+								<ports>
+									<port>8080:8080</port>
+								</ports>
+								<network>
+									<mode>bridge</mode>
+									<alias>keycloak-auth</alias>
+								</network>
+								<cmd>start-dev --import-realm</cmd>
+								<volumes>
+									<bind>
+										<volume>${project.basedir}/src/test/resources/IT/keycloak:/opt/keycloak/data/import</volume>
+									</bind>
+								</volumes>
+								<namingStrategy>alias</namingStrategy>
+								<log>
+									<date>default</date>
+									<color>magenta</color>
+									<prefix>keycloak-26-auth</prefix>
+								</log>
+								<wait>
+									<time>40000</time>
+									<log>Listening on: http://0.0.0.0:8080</log>
+								</wait>
+							</run>
+						</image>
+						<image>
 							<name>localhost:5000/order_service:1.0.1</name>
 							<registry>localhost:5000</registry>
 							<build>

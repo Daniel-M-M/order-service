@@ -1,10 +1,66 @@
-Per non dimenticare:
+# ORDER-SERVICE (core app)
+
+Questo servizio ha come obiettivo esser un servizio di base per lo sviluppo di
+microservice. Lo stack include db postgres, backend in Spring-boot. In aggiunta
+per la creazione del ambiente di sviluppo usiamo un cluster di kubernetes usando
+[kind](https://kind.sigs.k8s.io/) e un repository nella stessa rete del cluster.
+La parte di authentication e authorization è gestita da un container Keycloak 
+fuori cluster associato a un db postgres. Il servizio è gestito con [helm chart](https://helm.sh/it/)
+
+## Creazione del Cluster
+
+Per criare il cluster dobbiamo usare un file come questo descrito sotto, che ha
+la configurazione per il registry. Il servizio order-service fa uso di 'actuator' per il livness
+e readness di kubernets.
+
+    kind: Cluster
+    apiVersion: kind.x-k8s.io/v1alpha4
+    containerdConfigPatches:
+    - |-
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors."localhost:5000"]
+      endpoint = ["http://test-register:5000"]
+      nodes:
+      - role: control-plane
+        extraPortMappings:
+          - containerPort: 80
+            hostPort: 81
+            protocol: TCP
+      - role: worker
+        extraMounts:
+          - hostPath: /home/dmm/learn_k8s/DevOps_Directive/kind-pv
+            containerPath: /some/path/in/container
+      - role: worker
+        extraMounts:
+          - hostPath: /home/dmm/learn_k8s/DevOps_Directive/kind-pv
+            containerPath: /some/path/in/container
+
+Dopo aver salvato il file usiamo il comando di kind per creare il cluster:
+
+```bash
+kind create cluster --name my-cluster --config kind-example-config.yaml
+```
+
+## Creating a Registry
+
+Usando un esempio dal sito di Kind:
+
+```bash
+reg_name='kind-registry'
+reg_port='5001'
+if [ "$(docker inspect -f '{{.State.Running}}' "${reg_name}" 2>/dev/null || true)" != 'true' ]; then
+  docker run \
+    -d --restart=always -p "127.0.0.1:${reg_port}:5000" --network bridge --name "${reg_name}" \
+    
+```
 
 Usato un comando per vincolare il repository esterno nella network del cluster usando il commando sotto:
+```bash
+docker network connect "kind" "${reg_name}"
+```
 
-    docker network connect "kind" "${reg_name}"
+## Helm Configuration
 
-Modificato la chart di helm per avere una ConfigMap:
+Crea una chart di helm e aggiunge una configMap per il registry local appena creato:
 
     apiVersion: v1
     kind: ConfigMap
@@ -12,11 +68,12 @@ Modificato la chart di helm per avere una ConfigMap:
     name: local-registry-hosting
     namespace: kube-public
     data:
-    localRegistryHosting.v1: |
-    host: "localhost:5000"
-    help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
+      localRegistryHosting.v1: |
+        host: "localhost:5000"
+        help: "https://kind.sigs.k8s.io/docs/user/local-registry/"
 
-Modificato values per avere come riferimento il registro esterno e la tag per le imagine docker generate:
+Modificato values di helm per fare riferimento il registro esterno invece di usare il
+registro di docker locale, e la tag per le imagine docker generate da maven deploy:
 
     image:
     repository: localhost:5000/order_service
@@ -25,190 +82,76 @@ Modificato values per avere come riferimento il registro esterno e la tag per le
     # Overrides the image tag whose default is the chart appVersion.
     tag: "1.0.1"
 
-Esempio implementazione per keycloak
+## Configurazione Keycloak
 
-first look at this [link](https://www.baeldung.com/keycloak-oauth2-openid-swagger)
+Creazione di un container Keycloak da docker-compose presente nel repo e creazione di
+un container postgres per il keycloak service:
 
-keycloak for [cluster](https://www.keycloak.org/getting-started/getting-started-kube)
-keycloak for [docker](https://www.keycloak.org/getting-started/getting-started-docker)
-
-## 1. Il Flusso: Cosa deve fare il Frontend?
-
-Quando un utente fa il login sul frontend (es. React, Angular, Vue):
-
-1. Il frontend reindirizza l'utente a **Keycloak**.
-2. L'utente si autentica e Keycloak restituisce al frontend un **Access Token (JWT)**.
-3. Da quel momento in poi, per ogni richiesta verso il microservizio degli ordini, il frontend deve inserire l'Access Token nell'header HTTP:
-   `Authorization: Bearer <IL_TUO_JWT_TOKEN>`
-
-Il microservizio degli ordini non parlerà direttamente con Keycloak per ogni richiesta: estrarrà il JWT dall'header, ne verificherà la firma crittografica e controllerà i ruoli dell'utente.
-
-## 2. Passo 1: Configurare il Contratto (OpenAPI / Swagger YAML)
-
-Visto che usi il Contract-First, devi definire la sicurezza direttamente nel file di configurazione di Swagger, in modo che i generatori di codice (come `openapi-generator-maven-plugin`) creino le interfacce con le predisposizioni corrette.
-
-Aggiungi i `securitySchemes` in fondo al file e applicali globalmente o sui singoli endpoint:
-
-```yaml
-openapi: 3.0.3
-info:
-  title: Order Microservice API
-  version: 1.0.0
-
-# 1. Applica la sicurezza a tutti gli endpoint (o spostalo sotto i singoli path)
-security:
-  - KeycloakBearerAuth: []
-
-paths:
-  /orders:
-    get:
-      summary: Ottieni gli ordini
-      responses:
-        '200':
-          description: Successo
-
-components:
-  # 2. Definisci lo schema di sicurezza Bearer (JWT)
-  securitySchemes:
-    KeycloakBearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: Inserisci il token JWT ottenuto da Keycloak.
-
-```
-
-## 3. Passo 2: Configurare Spring Boot come Resource Server
-
-Nel tuo `pom.xml`, aggiungi la dipendenza per la sicurezza OAuth2:
-
-```xml
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-</dependency>
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-security</artifactId>
-</dependency>
-
-```
-
-Nel file `application.yml` del microservizio, indica a Spring Boot dove trovare la chiave pubblica di Keycloak per validare i token:
-
-```yaml
-spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          # Sostituisci con il tuo host, porta e nome del Realm su Keycloak
-          issuer-uri: http://localhost:8080/realms/mio-realm
-          jwk-set-uri: http://localhost:8080/realms/mio-realm/protocol/openid-connect/certs
-
-```
-
-## 4. Passo 3: La classe di configurazione di Spring Security
-
-Devi proteggere gli endpoint del microservizio, permettendo però il libero accesso a Swagger UI per ragioni di test.
-
-```java
-@Configuration
-@EnableWebSecurity
-public class SecurityConfig {
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .csrf(csrf -> csrf.disable()) // Spesso disabilitato nei microservizi stateless
-            .authorizeHttpRequests(auth -> auth
-                // Permetti l'accesso pubblico a Swagger e documentazione OpenAPI
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                // Tutto il resto richiede autenticazione
-                .anyRequest().authenticated()
-            )
-            .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
-            
-        return http.build();
-    }
-}
-
-```
-
-## 5. Come testare tutto da Swagger UI?
-
-Se usi la libreria `springdoc-openapi-ui` per visualizzare l'interfaccia grafica di Swagger nel browser, noterai che in alto a destra comparirà un bottone **"Authorize"** con un lucchetto.
-
-1. Fai una chiamata a Keycloak dal tuo frontend (o tramite Postman) per ottenere un JWT di test.
-2. Clicca su **Authorize** in Swagger UI.
-3. Incolla il JWT nel campo di testo.
-4. Da quel momento, ogni richiesta "Try it out" fatta da Swagger includerà automaticamente l'header `Authorization: Bearer <token>`.
-
-### Consiglio Bonus per i Ruoli
-
-Keycloak inserisce i ruoli dentro un claim del JWT chiamato `realm_access.roles`. Spring Security di base non mappa automaticamente questo campo nei classici `GrantedAuthority` (cerca invece il claim `scope`).
-Se hai bisogno di proteggere gli ordini in base ai ruoli (es. `.requestMatchers("/orders/**").hasRole("USER")`), dovrai implementare un `JwtAuthenticationConverter` customizzato per estrarre i ruoli da Keycloak.
-
-id: 727f0600-2aeb-4770-8afa-51cba1a519a2
-token: eyJhbGciOiJIUzUxMiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI5ZjkyOWYwYS1jZTdlLTQ5ODMtODI5ZC1kMWYwNjJlZGM2MTkifQ.eyJleHAiOjE3ODQ5MDcwNDIsImlhdCI6MTc4NDgyMDY0MiwianRpIjoiNzI3ZjA2MDAtMmFlYi00NzcwLThhZmEtNTFjYmExYTUxOWEyIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgxL3JlYWxtcy9mb29kbWFuYWdlciIsImF1ZCI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MS9yZWFsbXMvZm9vZG1hbmFnZXIiLCJ0eXAiOiJJbml0aWFsQWNjZXNzVG9rZW4iLCJhbGxvd2VkLW9yaWdpbnMiOlsiKiJdfQ.kTAs_4hP0VNPepum8FsnnhHHI1oUCqewwVgXixh8_W_tgEnmi--HS_sPoD7qL7AhJWtttHRnh6WZEMgm7fnG1w
-
-## **Client Credentials Keycloak**
-
-[tutorial-medium](https://medium.com/@nsalexamy/keycloak-and-spring-boot-oauth-2-0-and-openid-connect-oidc-authentication-304e7b511d02)
-
-Client ID: foodmanager
-
-CLient Secret: lvZ1F3cMfFVVQ4KnbEZzJsAin944FbWwSKZdA8HnF8mBaaE7idG1Gny7hHnpwQYxpjGs4Wx8NitjoGpGmkMh7d
+    db per keycloak and keycloak container
     
-    Token Payload: 
+    keycloak-postgresql:
+      image: postgres:16.8
+      restart: always
+      ports:
+        - 5435:5432
+      volumes:
+        - ./db_keycloak :/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+        POSTGRES_HOST_AUTH_METHOD: trust
+      healthcheck:
+        test: [ "CMD-SHELL", "pg_isready" ]
+        interval: 30s
+        timeout: 5s
+        retries: 5
+      logging:
+        driver: "json-file"
+        options:
+          max-size: "200k"
+          max-file: "5"
+
+    keycloak:
+      image: quay.io/keycloak/keycloak:26.7.0
+      container_name: keycloak
+      command: start-dev
+      restart: always
+      ports:
+        - 8081:8080
+      environment:
+        KC_BOOTSTRAP_ADMIN_USERNAME: admin
+        KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+        KC_SPI_ADMIN_REALM: master
+        KEYCLOAK_HTTP_RELATIVE_PATH: /
     
-    {
-    "exp": 1785441067,
-    "iat": 1785440767,
-    "auth_time": 1785440767,
-    "jti": "onrtac:ee9a333f-2a37-5d15-9546-8246ddf262e6",
-    "iss": "http://localhost:8081/realms/foodmanager",
-    "aud": "account",
-    "sub": "6830952e-7a52-49e3-8373-f56a5d6d526d",
-    "typ": "Bearer",
-    "azp": "foodmanager",
-    "sid": "40_xWW3_tW2LQxAa6K93iux1",
-    "acr": "1",
-    "allowed-origins": [
-    "*"
-    ],
-    "realm_access": {
-        "roles": [
-            "offline_access",
-            "uma_authorization",
-            "default-roles-foodmanager"
-        ]
-    },
-    "resource_access": {
-        "foodmanager": {
-            "roles": [
-                "ROLE_FOODMANAGER_USER"
-            ]
-            },
-        "account": {
-            "roles": [
-                "manage-account",
-                "manage-account-links",
-                "view-profile"
-            ]
-        }
-    },
-    "scope": "email profile",
-    "email_verified": true,
-    "name": "Marco Bianchi",
-    "preferred_username": "mbianchi",
-    "given_name": "Marco",
-    "family_name": "Bianchi",
-    "email": "m.bianchi@gmail.com"
-    }
+        KC_DB: postgres
+        KC_DB_URL: jdbc:postgresql://keycloak-postgresql:5432/keycloak
+        KC_DB_USERNAME: keycloak
+        KC_DB_PASSWORD: password
+      depends_on:
+        keycloak-postgresql:
+          condition: service_healthy
 
-Link to [Integration-test-keycloak](https://www.baeldung.com/spring-boot-keycloak-integration-testing)
+Per far si che il nostro integration test funzioni abbiamo bisogno di un file di configurazione
+di keycloak per installare durante la fase di creazione del conainer keycloak di test.
+Quindi usando il commando Docker possiamo aver queto file:
 
-**Command to keycloak file** 
+```bash
+docker exec -it containerId /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/import --realm myRealm --users realm_file
+```
 
-    docker exec -it 59d393242b3f /opt/keycloak/bin/kc.sh export --dir /opt/keycloak/data/import --realm foodmanager --users realm_file
+Adesso puoi usare il file per configurare il container di test di keycloak, dentro questo
+repo ho un esempio di file strato da un container keycloak di test 
+[foodmanager-realm](/src/test/resources/IT/keycloak/foodmanager-realm.json). 
+
+**Esempio implementazione per keycloak**
+
+- first look at this [link](https://www.baeldung.com/keycloak-oauth2-openid-swagger)
+- keycloak for [cluster](https://www.keycloak.org/getting-started/getting-started-kube)
+- keycloak for [docker](https://www.keycloak.org/getting-started/getting-started-docker)
+
+**Client Credentials Keycloak**
+
+- [tutorial-medium](https://medium.com/@nsalexamy/keycloak-and-spring-boot-oauth-2-0-and-openid-connect-oidc-authentication-304e7b511d02)
+- Link to [Integration-test-keycloak](https://www.baeldung.com/spring-boot-keycloak-integration-testing)
