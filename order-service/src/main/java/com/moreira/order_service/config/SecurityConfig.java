@@ -1,6 +1,6 @@
 package com.moreira.order_service.config;
 
-import com.moreira.order_service.filters.JwtFilter;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -34,7 +33,8 @@ public class SecurityConfig {
     };
 
     private static final String[] SECURITY = {
-            "/orders"
+            "/orders",
+            "/customers"
     };
 
     @Bean
@@ -52,8 +52,8 @@ public class SecurityConfig {
                         .requestMatchers(WHITELIST).permitAll()
                         .requestMatchers(SECURITY).permitAll()
                         .anyRequest().authenticated()
-                )
-                .addFilterBefore(new JwtFilter(), UsernamePasswordAuthenticationFilter.class);
+                );
+                //.addFilterBefore(UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -73,6 +73,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
-
 
 }

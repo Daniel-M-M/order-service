@@ -1,11 +1,8 @@
 package IT;
 
 import com.moreira.order_service.OrderServiceApplication;
-import com.moreira.order_service.mapper.OrderMapper;
 import com.moreira.order_service.model.Order;
 import com.moreira.order_service.model.PriceSummary;
-import com.moreira.order_service.service.OrderService;
-import dasniko.testcontainers.keycloak.KeycloakContainer;
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
@@ -13,14 +10,9 @@ import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.context.TestPropertySource;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -41,7 +33,6 @@ public class OrderTest {
     private int port;
 
     private String adminToken;
-    private String userToken;
 
     private String obtainAccessToken(String username, String password) {
         Response response = given()
@@ -62,7 +53,6 @@ public class OrderTest {
         RestAssured.port = port;
 
         this.adminToken = obtainAccessToken("dmoreiramariniello", "Dmm23Gio");
-        this.userToken  = obtainAccessToken("mbianchi", "MBianchi");
     }
 
     @Test
@@ -129,7 +119,6 @@ public class OrderTest {
                 .as(new TypeRef<>() {
                 });
 
-        assertThat(order.getDataOrder()).isNotNull();
         assertThat(ordersResponse.getFirst().getDataOrder()).isNotNull();
 
         //Assert for each element contains on response list
