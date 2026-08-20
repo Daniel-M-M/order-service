@@ -145,6 +145,27 @@ Adesso puoi usare il file per configurare il container di test di keycloak, dent
 repo ho un esempio di file strato da un container keycloak di test 
 [foodmanager-realm](/src/test/resources/IT/keycloak/foodmanager-realm.json). 
 
+## Risoluzione dei problemi comuni
+
+### Errore di connessione a Keycloak nel Pod (Connection refused)
+
+Se riscontri un errore `Connection refused` durante l'avvio del pod Kubernetes (Kind), è probabilmente perché l'applicazione sta cercando di connettersi a `localhost:8081`. Nel contesto di un pod, `localhost` si riferisce al pod stesso, mentre Keycloak è in esecuzione all'esterno del cluster.
+
+**Soluzione:**
+Devi aggiornare il segreto `order-service-secrets` o le variabili di ambiente `OAUTH2_ISSUER_URI` e `OAUTH2_JWT_ISSUER_URI` per puntare all'indirizzo IP dell'host.
+
+Se usi **Kind su Linux**, puoi solitamente usare l'IP del bridge docker (es. `172.17.0.1`):
+```bash
+OAUTH2_ISSUER_URI=http://172.17.0.1:8081/realms/foodmanager
+```
+
+Se usi **Docker Desktop**, puoi usare:
+```bash
+OAUTH2_ISSUER_URI=http://host.docker.internal:8081/realms/foodmanager
+```
+
+Assicurati che il valore nel segreto Kubernetes `order-service-secrets` (chiave `keycloak_issuer_uri`) sia aggiornato correttamente.
+
 **Esempio implementazione per keycloak**
 
 - first look at this [link](https://www.baeldung.com/keycloak-oauth2-openid-swagger)

@@ -77,16 +77,11 @@ spec:
                 secretKeyRef:
                   name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}
                   key: {{ required "A user is required!" .Values.config.keycloak.external.clientId }}
-            - name: OAUTH2_ISSUER_URI
+            - name: KEYCLOAK_ISSUER_URI
               valueFrom:
                 secretKeyRef:
                   name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}
                   key: {{ required "A user is required!" .Values.config.keycloak.external.issuer }}
-            - name: OAUTH2_JWT_ISSUER_URI
-              valueFrom:
-                secretKeyRef:
-                  name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}
-                  key: {{ required "A user is required!" .Values.config.keycloak.external.jwtIssuer }}
             - name: AUTH_URL
               valueFrom:
                 secretKeyRef:
@@ -97,7 +92,7 @@ spec:
                 secretKeyRef:
                   name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}
                   key: {{ required "A user is required!" .Values.config.keycloak.external.tokenUrl }}
-            - name: NSA2_OAUTH_REDIRECT_URI
+            - name: SWAGGER_OAUTH2_REDIRECT_URL
               valueFrom:
                 secretKeyRef:
                   name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}

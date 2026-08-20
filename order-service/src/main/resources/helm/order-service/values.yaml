@@ -142,14 +142,19 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 
 # Additional volumes on the output Deployment definition.
-volumes: []
+volumes:
+  - name: openapi
+    configMap:
+      name: {{ include "order-service.fullname" . }}-openapi
   # - name: foo
   #   secret:
   #     secretName: mysecret
   #     optional: false
 
 # Additional volumeMounts on the output Deployment definition.
-volumeMounts: []
+volumeMounts:
+  - name: openapi
+    mountPath: /app/openapi
   # - name: foo
   #   mountPath: "/etc/foo"
   #   readOnly: true
@@ -179,9 +184,8 @@ config:
     external:
       url: keycloak_url
       realm: keycloak_realm
-      issuer: keycloak_issuer_uri
-      jwtIssuer: keycloak_jwt_issuer_uri
       clientId: Keycloak_clientId
+      issuer: keycloak_issuer_uri
       authUrl: auth_url
       tokenUrl: token_url
       redirectUri: keycloak_redirect_uri
