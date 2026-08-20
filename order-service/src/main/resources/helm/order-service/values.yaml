@@ -11,7 +11,7 @@ image:
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.0.1"
+  tag: "1.0.3"
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
@@ -171,3 +171,19 @@ config:
       queryTimeout: 5
       poolMaxConnections: 15
       poolMinConnections: 15
+
+  keycloak:
+    # IMPORTANT: If Keycloak is running outside the cluster (e.g. on host), 
+    # ensure these keys in the secret point to the host IP instead of localhost.
+    # redirect port change to the forwarding port and add this path il keycloak.
+    external:
+      url: keycloak_url
+      realm: keycloak_realm
+      issuer: keycloak_issuer_uri
+      jwtIssuer: keycloak_jwt_issuer_uri
+      clientId: Keycloak_clientId
+      authUrl: auth_url
+      tokenUrl: token_url
+      redirectUri: keycloak_redirect_uri
+    secrets:
+      name: order-service-secrets
