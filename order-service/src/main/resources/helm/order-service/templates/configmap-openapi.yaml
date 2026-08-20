@@ -326,9 +326,9 @@ data:
           type: oauth2
           flows:
             authorizationCode:
-              authorizationUrl: 
-              tokenUrl: {{ .Values.config.keycloak.external.authUrl | quote }}
-              scopes: {{ .Values.config.keycloak.external.tokenUrl | quote }}
+              authorizationUrl: {{ .Values.config.keycloak.external.authUrl | quote }}
+              tokenUrl: {{ .Values.config.keycloak.external.tokenUrl | quote }}
+              scopes: 
                 openid: OpenID Connect
                 profile: User Profile
                 read_access: Permesso di lettura

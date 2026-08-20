@@ -145,7 +145,7 @@ autoscaling:
 volumes:
   - name: openapi
     configMap:
-      name: {{ include "order-service.fullname" . }}-openapi
+      name: order-service-test-openapi
   # - name: foo
   #   secret:
   #     secretName: mysecret
@@ -154,7 +154,7 @@ volumes:
 # Additional volumeMounts on the output Deployment definition.
 volumeMounts:
   - name: openapi
-    mountPath: /app/openapi
+    mountPath: /config/openapi
   # - name: foo
   #   mountPath: "/etc/foo"
   #   readOnly: true
@@ -186,8 +186,8 @@ config:
       realm: keycloak_realm
       clientId: Keycloak_clientId
       issuer: keycloak_issuer_uri
-      authUrl: auth_url
-      tokenUrl: token_url
+      authUrl: http://192.168.1.132:8081/realms/foodmanager/protocol/openid-connect/auth
+      tokenUrl: http://192.168.1.132:8081/realms/foodmanager/protocol/openid-connect/token
       redirectUri: keycloak_redirect_uri
     secrets:
       name: order-service-secrets

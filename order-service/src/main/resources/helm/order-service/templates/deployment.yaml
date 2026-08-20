@@ -82,16 +82,6 @@ spec:
                 secretKeyRef:
                   name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}
                   key: {{ required "A user is required!" .Values.config.keycloak.external.issuer }}
-            - name: AUTH_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}
-                  key: {{ required "A user is required!" .Values.config.keycloak.external.authUrl }}
-            - name: TOKEN_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}
-                  key: {{ required "A user is required!" .Values.config.keycloak.external.tokenUrl }}
             - name: SWAGGER_OAUTH2_REDIRECT_URL
               valueFrom:
                 secretKeyRef:
