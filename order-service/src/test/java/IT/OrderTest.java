@@ -68,6 +68,7 @@ public class OrderTest {
 
         Order responseOrder = given()
             .contentType(ContentType.JSON)
+            .header("Authorization", "Bearer " + adminToken)
             .body(requestPayload)
             .post("/orders")
             .then()
@@ -76,10 +77,10 @@ public class OrderTest {
             .as(Order.class);
 
         assertNotNull(responseOrder.getDataOrder(), "La data dell'ordine non deve essere null");
-        assertEquals("Francesco", responseOrder.getName());
-        assertEquals("Nero", responseOrder.getCognome());
+        assertEquals("Daniel", responseOrder.getName());
+        assertEquals("Moreira Mariniello", responseOrder.getCognome());
         assertEquals("2026-06-26", responseOrder.getDataOrder().toString());
-        assertEquals("nero.f@gmail.com", responseOrder.getEmail());
+        assertEquals("dmoreiramariniello@imolainformatica.it", responseOrder.getEmail());
         assertEquals(Double.parseDouble("78.92"), responseOrder.getPrice());
 
     }
@@ -109,6 +110,7 @@ public class OrderTest {
         assertThat(order.getDataOrder()).isNotNull();
 
         List<Order> ordersResponse = given()
+                .header("Authorization", "Bearer " + adminToken)
                 .queryParam("page", 0)
                 .queryParam("size", 10)
                 .when()
@@ -154,6 +156,7 @@ public class OrderTest {
 
         Order order = given()
                 .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + adminToken)
                 .body(requestPayload)
                 .post("/orders")
                 .then()
@@ -200,15 +203,16 @@ public class OrderTest {
     public void PriceSummaryTestGet(){
 
         Order requestPayload = new Order(
-                "Filippo",
-                "Verdi",
-                "verdi.f@gmail.com",
+                "Daniel",
+                "Moreira Mariniello",
+                "dmoreiramariniello@imolainformatica.it",
                 LocalDate.parse("2026-07-01"),
                 Double.parseDouble("10.00")
         );
 
         Order order = given()
                 .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + adminToken)
                 .body(requestPayload)
                 .post("/orders")
                 .then()
@@ -217,15 +221,16 @@ public class OrderTest {
                 .as(Order.class);
 
         Order requestPayload2 = new Order(
-                "Filippo",
-                "Verdi",
-                "verdi.f@gmail.com",
+                "Daniel",
+                "Moreira Mariniello",
+                "dmoreiramariniello@imolainformatica.it",
                 LocalDate.parse("2026-07-09"),
                 Double.parseDouble("10.00")
         );
 
         Order order2 = given()
                 .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + adminToken)
                 .body(requestPayload2)
                 .post("/orders")
                 .then()
@@ -255,7 +260,7 @@ public class OrderTest {
                         PriceSummary::getTotal
                 )
                 .contains(tuple(
-                        "Verdi Filippo",
+                        "Moreira Mariniello Daniel",
                         20.00
                 ));
 
