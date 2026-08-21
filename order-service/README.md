@@ -176,3 +176,18 @@ Assicurati che il valore nel segreto Kubernetes `order-service-secrets` (chiave 
 
 - [tutorial-medium](https://medium.com/@nsalexamy/keycloak-and-spring-boot-oauth-2-0-and-openid-connect-oidc-authentication-304e7b511d02)
 - Link to [Integration-test-keycloak](https://www.baeldung.com/spring-boot-keycloak-integration-testing)
+
+## VALEUS CONFIGURATION
+
+| Key | Value | description |
+|-----|-----|-----|
+| image.repository | localhost:5000/order_service | Point to local repository container |
+| image.tag | "1.0.4" | Tag for image on registry |
+| livenessProbe.httpGet.path | /actuator/health/liveness | use actuator |
+| readinessProbe.httpGet.path | /actuator/health/readiness | use actuator |
+| volumeMounts.mountPath | /config/openapi | The same of application.properties.yaml spring.web.resources.static-locations=file:**/config/openapi/**,classpath:/static/ |
+| config.keycloak.external.redirectUri | http://\<hostname>:\<port>\/swagger-ui/oauth2-redirect.html | Redirect to swagger the login result | 
+| config.keycloak.external.issuer | http://\<hostname>:8081/realms/<my-healm> | Used by spring to get keycloak public key and validate |
+| config.keycloak.external.authUrl | http://\<hostname>:8081/realms/<my-healm>/protocol/openid-connect/auth | Used to authenticate on keycloak |
+| config.keycloak.external.tokenUrl | http://\<hostname>:8081/realms/<my-healm>/protocol/openid-connect/token | Used to retrieve the token |
+| config.swagger.port | 3030 | this port is changeable and rifer to a forward swagger-ui of the svc |

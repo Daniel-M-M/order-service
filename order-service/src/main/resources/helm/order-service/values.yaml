@@ -11,7 +11,7 @@ image:
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.0.4"
+  tag: "1.0.5"
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
@@ -88,7 +88,7 @@ httpRoute:
     # namespace: default
   # Hostnames matching HTTP header.
   hostnames:
-  - chart-example.local
+  - order-service.moreira.com
   # List of rules and filters applied.
   rules:
   - matches:
@@ -191,3 +191,5 @@ config:
       redirectUri: keycloak_redirect_uri
     secrets:
       name: order-service-secrets
+  swagger:
+    port: 3030
