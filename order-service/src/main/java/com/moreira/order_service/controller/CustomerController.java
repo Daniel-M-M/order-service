@@ -4,7 +4,8 @@ import com.moreira.order_service.mapper.OrderMapper;
 import com.moreira.order_service.model.Order;
 import com.moreira.order_service.model.PriceSummary;
 import com.moreira.order_service.service.CustomerService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
@@ -16,13 +17,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.LocalDate;
 import java.util.*;
 
+@Slf4j
+@AllArgsConstructor
 @RestController
 public class CustomerController implements CustomerApi{
 
-    @Autowired
     private CustomerService customerService;
-
-    @Autowired
     private OrderMapper orderMapper;
 
     @Override
@@ -31,12 +31,14 @@ public class CustomerController implements CustomerApi{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(authentication instanceof JwtAuthenticationToken jwtAuth)) {
+            log.error("Invalid JWT Token - customer orders");
             throw new AccessDeniedException("Access denied: Invalid Token.");
         }
 
         Jwt jwt = jwtAuth.getToken();
 
         if (!Objects.equals(jwt.getClaimAsString("preferred_username"), userName)) {
+            log.error("Insufficient Access to User - customer orders");
             throw new AccessDeniedException("Access denied: Insufficient role or permissions.");
         }
 
@@ -51,12 +53,14 @@ public class CustomerController implements CustomerApi{
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (!(authentication instanceof JwtAuthenticationToken jwtAuth)) {
+            log.error("Invalid JWT Token - customer summary");
             throw new AccessDeniedException("Access denied: Invalid Token.");
         }
 
         Jwt jwt = jwtAuth.getToken();
 
         if (!Objects.equals(jwt.getClaimAsString("preferred_username"), userName)) {
+            log.error("Insufficient Access to User - customer summary");
             throw new AccessDeniedException("Access denied: Insufficient role or permissions.");
         }
 

@@ -17,13 +17,13 @@ import java.io.IOException;
 public class KeycloakTokenFilter extends OncePerRequestFilter {
 
     private static final String BEARER = "Bearer ";
-    private final static String authorizationHeader = "Authorization";
+    private static final String AUTHORIZATIONHEADER = "Authorization";
     private final KeycloakTokenValidator tokenValidator;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        String authHeader = request.getHeader(authorizationHeader);
+        String authHeader = request.getHeader(AUTHORIZATIONHEADER);
 
         if (authHeader != null && authHeader.startsWith(BEARER)) {
             try {

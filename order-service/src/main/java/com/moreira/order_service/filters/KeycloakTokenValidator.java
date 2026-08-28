@@ -29,7 +29,7 @@ public class KeycloakTokenValidator  {
 
     public static final String JWT_AUD = "aud";
 
-    private String jwkUrl;
+    public String jwkUrl;
 
     //Client ID
     private String resource;
@@ -37,8 +37,8 @@ public class KeycloakTokenValidator  {
     //keycloak mapper for client id: preferred_username or username
     private String jwtClaim;
 
-    private int connectTimeoutms = 0;
-    private int readTimeoutms = 0;
+    private int connectTimeOutMs = 0;
+    private int readTimeOutMs = 0;
     private int sizeLimit= 0;
 
     @Setter
@@ -63,7 +63,7 @@ public class KeycloakTokenValidator  {
     }
 
     public JWKSet getJwkSet(String jwkUrl) throws IOException, ParseException {
-        return JWKSet.load(new URL(jwkUrl), connectTimeoutms, readTimeoutms, sizeLimit);
+        return JWKSet.load(new URL(jwkUrl), connectTimeOutMs, readTimeOutMs, sizeLimit);
     }
 
     public String validate(String accessToken) throws BadJOSEException {
@@ -107,12 +107,12 @@ public class KeycloakTokenValidator  {
         }
 
         public Builder connectTimeout(final int connectTimeout) {
-            accessTokenValidator.connectTimeoutms = connectTimeout;
+            accessTokenValidator.readTimeOutMs = connectTimeout;
             return this;
         }
 
         public Builder readTimeout(final int readTimeout) {
-            accessTokenValidator.readTimeoutms = readTimeout;
+            accessTokenValidator.readTimeOutMs = readTimeout;
             return this;
         }
 

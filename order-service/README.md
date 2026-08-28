@@ -177,7 +177,7 @@ Assicurati che il valore nel segreto Kubernetes `order-service-secrets` (chiave 
 - [tutorial-medium](https://medium.com/@nsalexamy/keycloak-and-spring-boot-oauth-2-0-and-openid-connect-oidc-authentication-304e7b511d02)
 - Link to [Integration-test-keycloak](https://www.baeldung.com/spring-boot-keycloak-integration-testing)
 
-## VALEUS CONFIGURATION
+## ORDER SERVICE VALEUS CONFIGURATION
 
 | Key | Value | description |
 |-----|-----|-----|
@@ -192,20 +192,24 @@ Assicurati che il valore nel segreto Kubernetes `order-service-secrets` (chiave 
 | config.keycloak.external.tokenUrl | http://\<hostname>:8081/realms/<my-healm>/protocol/openid-connect/token | Used to retrieve the token |
 | config.swagger.port | 3030 | this port is changeable and rifer to a forward swagger-ui of the svc |
 
+## SPLUNK CONFIGURATION
 
-{   "@timestamp":"2026-08-27T08:30:32.798011463Z",
-    "log":{
-        "level":"TRACE",
-        "logger":"org.springframework.security.web.header.writers.HstsHeaderWriter"},
-    "process":{
-        "pid":30255,
-        "thread":{
-            "name":"http-nio-3000-exec-9"}},
-    "service":{
-        "name":"order-service",
-        "node":{}},
-    "message":"Not injecting HSTS header since it did not match request to [Is Secure]",
-    "tags":["COMMONS-LOGGING"],
-    "ecs":{
-        "version":"8.11"}
-}
+Nel nostro caso abbiamo dovuto installare Splunk OpenTelemetry Collector in un namespace separato dal servizio usando un values.yaml file apposta per la nostra situazione.
+
+    clusterName: kind-ci-cd-learn
+    
+    logsCollection:
+        containers:
+            enabled: true
+            containerRuntime: containerd
+    
+    secret:
+        create: false
+        name: splunk-hec-token
+    
+    splunkPlatform:
+        endpoint: https://172.18.0.1:8088/services/collector
+        index: orders
+        insecureSkipVerify: true
+        source: kubernetes
+        token: ""
