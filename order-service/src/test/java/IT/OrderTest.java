@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "spring.flyway.enabled=false")
 @TestPropertySource(locations = {"classpath:IT/application-test.properties"})
-public class OrderTest {
+class OrderTest {
 
     @LocalServerPort
     private int port;
@@ -52,16 +52,16 @@ public class OrderTest {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = port;
 
-        this.adminToken = obtainAccessToken("dmoreiramariniello", "Dmm23Gio");
+        this.adminToken = obtainAccessToken("dmoreira", "Dmm23Gio");
     }
 
     @Test
-    public void OrderTestPost(){
+    void OrderTestPost(){
 
         Order requestPayload = new Order(
-            "Francesco",
-            "Nero",
-            "nero.f@gmail.com",
+            "Daniel",
+            "Moreira Mariniello",
+            "moreira.d@gmail.com",
             LocalDate.parse("2026-06-26"),
             Double.parseDouble("78.92")
         );
@@ -80,18 +80,18 @@ public class OrderTest {
         assertEquals("Daniel", responseOrder.getName());
         assertEquals("Moreira Mariniello", responseOrder.getCognome());
         assertEquals("2026-06-26", responseOrder.getDataOrder().toString());
-        assertEquals("dmoreiramariniello@imolainformatica.it", responseOrder.getEmail());
+        assertEquals("moreira.d@gmail.com", responseOrder.getEmail());
         assertEquals(Double.parseDouble("78.92"), responseOrder.getPrice());
 
     }
 
     @Test
-    public void OrderTestGet(){
+    void OrderTestGet(){
 
         Order requestPayload = new Order(
-                "Mario",
-                "Rossi",
-                "rossi.m@gmail.com",
+                "Daniel",
+                "Moreira Mariniello",
+                "moreira.d@gmail.com",
                 LocalDate.parse("2026-06-26"),
                 Double.parseDouble("89.53")
         );
@@ -144,7 +144,7 @@ public class OrderTest {
     }
 
     @Test
-    public void OrderTestGetWithUUID(){
+    void OrderTestGetWithUUID(){
 
         Order requestPayload = new Order(
                 "Marco",
@@ -200,12 +200,12 @@ public class OrderTest {
     }
 
     @Test
-    public void PriceSummaryTestGet(){
+    void PriceSummaryTestGet(){
 
         Order requestPayload = new Order(
                 "Daniel",
                 "Moreira Mariniello",
-                "dmoreiramariniello@imolainformatica.it",
+                "moreira.d@gmail.com",
                 LocalDate.parse("2026-07-01"),
                 Double.parseDouble("10.00")
         );
@@ -223,7 +223,7 @@ public class OrderTest {
         Order requestPayload2 = new Order(
                 "Daniel",
                 "Moreira Mariniello",
-                "dmoreiramariniello@imolainformatica.it",
+                "moreira.d@gmail.com",
                 LocalDate.parse("2026-07-09"),
                 Double.parseDouble("10.00")
         );

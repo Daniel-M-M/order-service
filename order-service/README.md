@@ -191,3 +191,21 @@ Assicurati che il valore nel segreto Kubernetes `order-service-secrets` (chiave 
 | config.keycloak.external.authUrl | http://\<hostname>:8081/realms/<my-healm>/protocol/openid-connect/auth | Used to authenticate on keycloak |
 | config.keycloak.external.tokenUrl | http://\<hostname>:8081/realms/<my-healm>/protocol/openid-connect/token | Used to retrieve the token |
 | config.swagger.port | 3030 | this port is changeable and rifer to a forward swagger-ui of the svc |
+
+
+{   "@timestamp":"2026-08-27T08:30:32.798011463Z",
+    "log":{
+        "level":"TRACE",
+        "logger":"org.springframework.security.web.header.writers.HstsHeaderWriter"},
+    "process":{
+        "pid":30255,
+        "thread":{
+            "name":"http-nio-3000-exec-9"}},
+    "service":{
+        "name":"order-service",
+        "node":{}},
+    "message":"Not injecting HSTS header since it did not match request to [Is Secure]",
+    "tags":["COMMONS-LOGGING"],
+    "ecs":{
+        "version":"8.11"}
+}

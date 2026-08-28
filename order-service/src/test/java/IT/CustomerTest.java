@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
         properties = "spring.flyway.enabled=false")
 @TestPropertySource(locations = {"classpath:IT/application-test.properties"})
-public class CustomerTest {
+class CustomerTest {
 
     @LocalServerPort
     private int port;
@@ -56,7 +56,7 @@ public class CustomerTest {
     }
 
     @Test
-    public void testGetCustomerOrders() {
+    void testGetCustomerOrders() {
         Order requestPayload1 = new Order(
                 "Marco",
                 "Bianchi",
@@ -154,7 +154,7 @@ public class CustomerTest {
     }
 
     @Test
-    public void testGetCustomerOrdersSummary() {
+    void testGetCustomerOrdersSummary() {
 
         Order requestPayload1 = new Order(
                 "Marco",

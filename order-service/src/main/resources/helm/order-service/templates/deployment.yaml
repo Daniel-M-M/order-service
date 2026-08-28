@@ -45,7 +45,7 @@ spec:
               containerPort: {{ .Values.service.port }}
               protocol: TCP
           env:
-            {{- range $k, $v := $.Values.config.databases}}
+            {{- range $k, $v := $.Values.config.databases }}
             - name: {{ $k | upper }}_URL
               valueFrom:
                 secretKeyRef:
@@ -62,16 +62,6 @@ spec:
                   name: {{ required "A secretName is required!" $v.secrets.name }}
                   key: {{ required "A key is required!" $v.secrets.password }}
             {{- end }}
-            - name: KEYCLOAK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}
-                  key: {{ required "A user is required!" .Values.config.keycloak.external.url }}
-            - name: KEYCLOAK_REALM
-              valueFrom:
-                secretKeyRef:
-                  name: {{ required "A secretName is required!" .Values.config.keycloak.secrets.name }}
-                  key: {{ required "A user is required!" .Values.config.keycloak.external.realm }}
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:

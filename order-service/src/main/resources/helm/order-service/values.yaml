@@ -11,7 +11,7 @@ image:
   # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.0.5"
+  tag: "1.0.6"
 
 # This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
@@ -182,12 +182,10 @@ config:
     # ensure these keys in the secret point to the host IP instead of localhost.
     # redirect port change to the forwarding port and add this path il keycloak.
     external:
-      url: keycloak_url
-      realm: keycloak_realm
       clientId: Keycloak_clientId
       issuer: keycloak_issuer_uri
-      authUrl: http://192.168.1.132:8081/realms/foodmanager/protocol/openid-connect/auth
-      tokenUrl: http://192.168.1.132:8081/realms/foodmanager/protocol/openid-connect/token
+      authUrl: http://172.18.0.1:8081/realms/foodmanager/protocol/openid-connect/auth
+      tokenUrl: http://172.18.0.1:8081/realms/foodmanager/protocol/openid-connect/token
       redirectUri: keycloak_redirect_uri
     secrets:
       name: order-service-secrets

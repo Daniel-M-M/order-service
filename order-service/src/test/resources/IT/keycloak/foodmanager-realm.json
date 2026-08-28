@@ -434,10 +434,10 @@
   "webAuthnPolicyPasswordlessExtraOrigins" : [ ],
   "users" : [ {
     "id" : "4cd6e390-82b2-4a95-a34a-7ae755e062bd",
-    "username" : "dmoreiramariniello",
+    "username" : "dmoreira",
     "firstName" : "Daniel",
     "lastName" : "Moreira Mariniello",
-    "email" : "dmoreiramariniello@imolainformatica.it",
+    "email" : "moreira.d@gmail.com",
     "emailVerified" : true,
     "enabled" : true,
     "createdTimestamp" : 1785519435783,

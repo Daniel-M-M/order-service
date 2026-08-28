@@ -345,13 +345,6 @@
 								<network>
 									<mode>bridge</mode>
 								</network>
-<!--								<volumes>-->
-<!--									<bind>-->
-<!--										<volume>-->
-<!--											${project.basedir}/Dockerfile/postgres/volumes/Dockerfile-entrypoint-initdb.d:/Dockerfile-entrypoint-initdb.d-->
-<!--										</volume>-->
-<!--									</bind>-->
-<!--								</volumes>-->
 								<namingStrategy>alias</namingStrategy>
 								<log>
 									<date>default</date>
@@ -364,8 +357,6 @@
 											to switch on multi line matching. -->
 									<!-- NOTA: su windows log non funziona-->
 									<!-- Time in milliseconds to block. -->
-
-									<!--<time>120000</time>-->
 									<time>20000</time>
 									<log>database system is ready to accept connections</log>
 								</wait>
@@ -405,7 +396,7 @@
 							</run>
 						</image>
 						<image>
-							<name>localhost:5000/order_service:1.0.5</name>
+							<name>localhost:5000/order_service:1.0.6</name>
 							<registry>localhost:5000</registry>
 							<build>
 								<dockerFile>${project.basedir}/src/main/resources/docker/Dockerfile</dockerFile>

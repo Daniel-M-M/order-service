@@ -79,3 +79,19 @@ services:
     depends_on:
       keycloak-postgresql:
         condition: service_healthy
+
+  splunk:
+    image: splunk/splunk:latest
+    container_name: splunk
+    restart: always
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com
+      SPLUNK_PASSWORD: ChangeMe123!
+      SPLUNK_HEC_TOKEN: "11111111-2222-3333-4444-555555555555"
+    ports:
+      - "8000:8000"
+      - "8088:8088"
+    volumes:
+      - ./splunk-data:/opt/splunk/var
+      - ./splunk-etc:/opt/splunk/etc
